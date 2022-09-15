@@ -73,7 +73,7 @@ public class ToDoItem implements Serializable {
 
     public String getmToDoDescription() { return mToDoDescription;}
 
-    public void setmToDoDescription(String mToDoDescription){this.mToDoDescription = mToDoDescription;}
+    public void setToDoDescription(String mToDoDescription){this.mToDoDescription = mToDoDescription;}
 
     public String getToDoText() {
         return mToDoText;
