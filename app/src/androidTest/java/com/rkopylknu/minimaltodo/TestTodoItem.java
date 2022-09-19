@@ -23,7 +23,7 @@
 
 package com.rkopylknu.minimaltodo;
 
-import com.rkopylknu.minimaltodo.Utility.ToDoItem;
+import com.rkopylknu.minimaltodo.Utility.ToDoItemLegacy;
 
 import junit.framework.TestCase;
 
@@ -45,7 +45,7 @@ public class TestTodoItem extends TestCase {
       * Check we can construct a ToDoItem object using the three parameter constructor
       */
     public void testThreeParameterConstructor() {
-        ToDoItem toDoItem = getToDoItem(REMINDER_OFF);
+        ToDoItemLegacy toDoItem = getToDoItem(REMINDER_OFF);
         assertEquals(TEXT_BODY, toDoItem.getToDoText());
         assertEquals(REMINDER_OFF, toDoItem.hasReminder());
         assertEquals(CURRENT_DATE, toDoItem.getToDoDate());
@@ -55,7 +55,7 @@ public class TestTodoItem extends TestCase {
       * Ensure we can marshall ToDoItem objects to Json
       */
     public void testObjectMarshallingToJson() {
-        ToDoItem toDoItem = getToDoItem(REMINDER_ON);
+        ToDoItemLegacy toDoItem = getToDoItem(REMINDER_ON);
 
         try {
             JSONObject json = toDoItem.toJSON();
@@ -71,11 +71,11 @@ public class TestTodoItem extends TestCase {
     * Ensure we can create ToDoItem objects from Json data by using the json constructor
     */
     public void testObjectUnmarshallingFromJson() {
-        ToDoItem originalItem = getToDoItem(REMINDER_OFF);
+        ToDoItemLegacy originalItem = getToDoItem(REMINDER_OFF);
 
         try {
             JSONObject json = originalItem.toJSON();
-            ToDoItem itemFromJson = new ToDoItem(json);
+            ToDoItemLegacy itemFromJson = new ToDoItemLegacy(json);
 
             assertEquals(originalItem.getToDoText(), itemFromJson.getToDoText());
             assertEquals(originalItem.getToDoDate(), itemFromJson.getToDoDate());
@@ -87,7 +87,7 @@ public class TestTodoItem extends TestCase {
         }
     }
 
-    private ToDoItem getToDoItem(boolean hasReminder) {
-        return new ToDoItem(TEXT_BODY, hasReminder, CURRENT_DATE);
+    private ToDoItemLegacy getToDoItem(boolean hasReminder) {
+        return new ToDoItemLegacy(TEXT_BODY, hasReminder, CURRENT_DATE);
     }
 }

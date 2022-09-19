@@ -91,7 +91,7 @@ class MainFragment : AppDefaultFragment() {
             .apply()
 
 
-        storeRetrieveData = StoreRetrieveData(context, FILENAME)
+        storeRetrieveData = StoreRetrieveData(requireContext(), FILENAME)
         toDoItemsArrayList = getLocallyStoredData(storeRetrieveData)
         adapter = BasicListAdapter(toDoItemsArrayList!!)
 
@@ -100,9 +100,13 @@ class MainFragment : AppDefaultFragment() {
         coordLayout = view.findViewById(R.id.myCoordinatorLayout)
         addToDoItemFAB = view.findViewById<FloatingActionButton>(R.id.addToDoItemFAB).apply {
             setOnClickListener {
-                val item = ToDoItem("", "", false, null).apply {
-                    todoColor = ColorGenerator.MATERIAL.random()
-                }
+                val item = ToDoItem(
+                    text = "",
+                    description = "",
+                    hasReminder = false,
+                    date = null,
+                    color = ColorGenerator.MATERIAL.random()
+                )
 
                 val newTodo = Intent(context, AddToDoActivity::class.java)
                 newTodo.putExtra(TODOITEM, item)
@@ -222,20 +226,23 @@ class MainFragment : AppDefaultFragment() {
         toDoItemsArrayList?.forEach { item ->
             if (item == null) return@forEach
 
-            if (item.hasReminder() && item.toDoDate != null) {
-                if (item.toDoDate.before(Date())) {
-                    item.toDoDate = null
+            if (item.hasReminder && item.date != null) {
+                if (item.date.before(Date())) {
+                    toDoItemsArrayList?.remove(item)
+                    toDoItemsArrayList?.add(
+                        item.copy(date = null)
+                    )
                     return@forEach
                 }
 
                 val intent = Intent(context, TodoNotificationService::class.java)
-                intent.putExtra(TodoNotificationService.TODOUUID, item.identifier)
-                intent.putExtra(TodoNotificationService.TODOTEXT, item.toDoText)
+                intent.putExtra(TodoNotificationService.TODOUUID, item.id)
+                intent.putExtra(TodoNotificationService.TODOTEXT, item.text)
 
                 createAlarm(
                     intent,
-                    item.identifier.hashCode(),
-                    item.toDoDate.time
+                    item.id.hashCode(),
+                    item.date.time
                 )
             }
         }
@@ -270,18 +277,18 @@ class MainFragment : AppDefaultFragment() {
         }
         if (item == null) return
 
-        if (item.toDoText.isEmpty()) return
+        if (item.text.isEmpty()) return
 
         var existed = false
-        if (item.hasReminder() && item.toDoDate != null) {
+        if (item.hasReminder && item.date != null) {
             val intent = Intent(context, TodoNotificationService::class.java).apply {
-                putExtra(TodoNotificationService.TODOTEXT, item.toDoText)
-                putExtra(TodoNotificationService.TODOUUID, item.identifier)
+                putExtra(TodoNotificationService.TODOTEXT, item.text)
+                putExtra(TodoNotificationService.TODOUUID, item.id)
             }
             createAlarm(
                 intent,
-                item.identifier.hashCode(),
-                item.toDoDate.time
+                item.id.hashCode(),
+                item.date.time
             )
         }
 
@@ -289,7 +296,7 @@ class MainFragment : AppDefaultFragment() {
             val (index, curItem) = indexed
             if (curItem == null) return
 
-            if (curItem.identifier == toDoItemsArrayList?.get(index)?.identifier) {
+            if (curItem.id == toDoItemsArrayList?.get(index)?.id) {
                 toDoItemsArrayList?.set(index, curItem)
                 existed = true
                 adapter.notifyDataSetChanged()
@@ -334,15 +341,6 @@ class MainFragment : AppDefaultFragment() {
         adapter.notifyItemInserted(toDoItemsArrayList!!.size - 1)
     }
 
-    fun makeUpItems(items: ArrayList<ToDoItem?>, len: Int) {
-        for (testString in testStrings) {
-            val item = ToDoItem(testString, testString, false, Date())
-
-//            item.setTodoColor(getResources().getString(R.color.red_secondary));
-            items.add(item)
-        }
-    }
-
     inner class BasicListAdapter(
         private val items: ArrayList<ToDoItem?>,
     ) : RecyclerView.Adapter<BasicListAdapter.ViewHolder?>(),
@@ -377,7 +375,7 @@ class MainFragment : AppDefaultFragment() {
             holder.run {
                 linearLayout.setBackgroundColor(bgColor)
 
-                if (item.hasReminder() && item.toDoDate != null) {
+                if (item.hasReminder && item.date != null) {
                     mToDoTextview.maxLines = 1
                     mTimeTextView.visibility = View.VISIBLE
                 } else {
@@ -385,7 +383,7 @@ class MainFragment : AppDefaultFragment() {
                     mToDoTextview.maxLines = 2
                 }
 
-                mToDoTextview.text = item.toDoText
+                mToDoTextview.text = item.text
                 mToDoTextview.setTextColor(todoTextColor)
             }
 
@@ -394,10 +392,10 @@ class MainFragment : AppDefaultFragment() {
                 .useFont(Typeface.DEFAULT)
                 .toUpperCase()
                 .endConfig()
-                .buildRound(item.toDoText.substring(0, 1), item.todoColor)
+                .buildRound(item.text.substring(0, 1), item.color)
 
             holder.mColorImageView.setImageDrawable(myDrawable)
-            if (item.toDoDate != null) {
+            if (item.date != null) {
                 val timeToShow = AddToDoFragment
                     .formatDate(
                         if (DateFormat.is24HourFormat(context)) {
@@ -405,7 +403,7 @@ class MainFragment : AppDefaultFragment() {
                         } else {
                             DATE_TIME_FORMAT_12_HOUR
                         },
-                        item.toDoDate
+                        item.date
                     )
 
                 holder.mTimeTextView.text = timeToShow
@@ -430,7 +428,7 @@ class MainFragment : AppDefaultFragment() {
             indexOfDeletedToDoItem = position
 
             val i = Intent(context, TodoNotificationService::class.java)
-            deleteAlarm(i, justDeletedToDoItem.identifier.hashCode())
+            deleteAlarm(i, justDeletedToDoItem.id.hashCode())
             notifyItemRemoved(position)
 
             Snackbar
@@ -443,8 +441,8 @@ class MainFragment : AppDefaultFragment() {
                     items.add(indexOfDeletedToDoItem, justDeletedToDoItem)
 
                     if (
-                        justDeletedToDoItem.toDoDate != null &&
-                        justDeletedToDoItem.hasReminder()
+                        justDeletedToDoItem.date != null &&
+                        justDeletedToDoItem.hasReminder
                     ) {
                         val intent = Intent(
                             context,
@@ -452,17 +450,17 @@ class MainFragment : AppDefaultFragment() {
                         ).apply {
                             putExtra(
                                 TodoNotificationService.TODOTEXT,
-                                justDeletedToDoItem.toDoText
+                                justDeletedToDoItem.text
                             )
                             putExtra(
                                 TodoNotificationService.TODOUUID,
-                                justDeletedToDoItem.identifier
+                                justDeletedToDoItem.id
                             )
                         }
                         createAlarm(
                             intent,
-                            justDeletedToDoItem.identifier.hashCode(),
-                            justDeletedToDoItem.toDoDate.time
+                            justDeletedToDoItem.id.hashCode(),
+                            justDeletedToDoItem.date.time
                         )
                     }
                     notifyItemInserted(indexOfDeletedToDoItem)
@@ -522,7 +520,6 @@ class MainFragment : AppDefaultFragment() {
     companion object {
 
         const val TODOITEM = "com.rkopylknu.minimaltodo.MainActivity"
-        private const val REQUEST_ID_TODO_ITEM = 100
         const val DATE_TIME_FORMAT_12_HOUR = "MMM d, yyyy  h:mm a"
         const val DATE_TIME_FORMAT_24_HOUR = "MMM d, yyyy  k:mm"
         const val FILENAME = "todoitems.json"

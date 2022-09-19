@@ -2,11 +2,9 @@ package com.rkopylknu.minimaltodo.Reminder
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -24,8 +22,6 @@ import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.Utility.StoreRetrieveData
 import com.rkopylknu.minimaltodo.Utility.ToDoItem
 import com.rkopylknu.minimaltodo.Utility.TodoNotificationService
-import org.json.JSONException
-import java.io.IOException
 import java.util.*
 
 class ReminderFragment : AppDefaultFragment() {
@@ -52,7 +48,7 @@ class ReminderFragment : AppDefaultFragment() {
             activity?.setTheme(R.style.CustomStyle_DarkTheme)
         }
 
-        storeRetrieveData = StoreRetrieveData(context, MainFragment.FILENAME)
+        storeRetrieveData = StoreRetrieveData(requireContext(), MainFragment.FILENAME)
         mToDoItems = MainFragment.getLocallyStoredData(storeRetrieveData)
 
         val id = (activity as AppCompatActivity).run {
@@ -67,7 +63,7 @@ class ReminderFragment : AppDefaultFragment() {
         }
 
         mItem = mToDoItems?.firstOrNull {
-            it != null && it.identifier == id
+            it != null && it.id == id
         }
 
         snoozeOptionsArray = resources.getStringArray(R.array.snooze_options)
@@ -77,7 +73,7 @@ class ReminderFragment : AppDefaultFragment() {
         mSnoozeTextView = view.findViewById(R.id.reminderViewSnoozeTextView)
         mSnoozeSpinner = view.findViewById(R.id.todoReminderSnoozeSpinner)
 
-        mtoDoTextTextView.text = mItem?.toDoText
+        mtoDoTextTextView.text = mItem?.text
         if (theme == MainFragment.LIGHTTHEME) {
             mSnoozeTextView.setTextColor(
                 ResourcesCompat.getColor(
@@ -160,8 +156,10 @@ class ReminderFragment : AppDefaultFragment() {
         when (item.itemId) {
             R.id.toDoReminderDoneMenuItem -> {
                 val date = addTimeToDate(valueFromSpinner())
-                mItem?.toDoDate = date
-                mItem?.setHasReminder(true)
+                mItem = mItem?.copy(
+                    date = date,
+                    hasReminder = true
+                )
                 changeOccurred()
                 saveData()
                 closeApp()

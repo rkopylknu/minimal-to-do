@@ -28,7 +28,7 @@ import android.test.ActivityUnitTestCase;
 
 import com.rkopylknu.minimaltodo.Main.MainActivity;
 import com.rkopylknu.minimaltodo.Utility.StoreRetrieveData;
-import com.rkopylknu.minimaltodo.Utility.ToDoItem;
+import com.rkopylknu.minimaltodo.Utility.ToDoItemLegacy;
 
 import org.json.JSONArray;
 
@@ -41,8 +41,8 @@ import java.util.Date;
 public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
 
     private MainActivity mMainActivity;
-    private ArrayList<ToDoItem> mOriginalData;
-    ArrayList<ToDoItem> mTestData;
+    private ArrayList<ToDoItemLegacy> mOriginalData;
+    ArrayList<ToDoItemLegacy> mTestData;
 
     public TestStoreRetrieveData() {
         super(MainActivity.class);
@@ -50,7 +50,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
         // Create some test data
         mTestData = new ArrayList<>();
         for (int i = 1; i < 11; i++) {
-            mTestData.add(new ToDoItem(
+            mTestData.add(new ToDoItemLegacy(
                     "item" + i,
                     false,
                     new Date()));
@@ -66,7 +66,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
         // Save the original data and wipe out the storage
         StoreRetrieveData dataStorage = getDataStorage();
         try {
-            ArrayList<ToDoItem> items = dataStorage.loadFromFile();
+            ArrayList<ToDoItemLegacy> items = dataStorage.loadFromFile();
 
             if (items.size() > 0) {
                 mOriginalData.clear();
@@ -96,7 +96,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
     public void testPreconditions() {
         StoreRetrieveData dataStorage = getDataStorage();
 
-        ArrayList<ToDoItem> items = null;
+        ArrayList<ToDoItemLegacy> items = null;
         try {
             items = dataStorage.loadFromFile();
         } catch (Exception e) {
@@ -111,7 +111,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
      */
     public void testWritingToAndReadingFromTheDataStorage() {
         StoreRetrieveData dataStorage = getDataStorage();
-        ArrayList<ToDoItem> retrievedItems = new ArrayList<>();
+        ArrayList<ToDoItemLegacy> retrievedItems = new ArrayList<>();
 
         // Persist the test data
         try {
@@ -131,11 +131,11 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
         assertEquals(mTestData.size(), retrievedItems.size());
 
         // The content should be same as well...
-        for (ToDoItem retrievedItem : retrievedItems) {
+        for (ToDoItemLegacy retrievedItem : retrievedItems) {
             // We want to be sure every single item in data storage can also be found from
             // our test data collection
             boolean found = false;
-            for (ToDoItem testItem : mTestData) {
+            for (ToDoItemLegacy testItem : mTestData) {
 
                 // Check the items are same
                 if (retrievedItem.getIdentifier().equals(testItem.getIdentifier()) &&

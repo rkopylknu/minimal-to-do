@@ -25,7 +25,7 @@ import androidx.core.app.NavUtils
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import androidx.core.view.isVisible
+import androidx.fragment.app.setFragmentResult
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.rkopylknu.minimaltodo.AppDefault.AppDefaultFragment
 import com.rkopylknu.minimaltodo.Main.MainFragment
@@ -105,11 +105,11 @@ class AddToDoFragment : AppDefaultFragment(),
                 .getSerializableExtra(MainFragment.TODOITEM) as ToDoItem
         }
         userToDoItem.run {
-            userSelectedText = toDoText
-            userEnteredDescription = getmToDoDescription()
-            userHasReminder = hasReminder()
-            userReminderDate = toDoDate
-            userColor = todoColor
+            userSelectedText = text
+            userEnteredDescription = description
+            userHasReminder = hasReminder
+            userReminderDate = date
+            userColor = color
         }
 
         val reminderIconImageButton =
@@ -143,9 +143,9 @@ class AddToDoFragment : AppDefaultFragment(),
             view.findViewById(R.id.newToDoDateTimeReminderTextView)
 
         copyClipboard.setOnClickListener {
-            val toDoTextContainer = toDoTextBodyEditText?.text.toString()
+            val toDoTextContainer = toDoTextBodyEditText.text
             val toDoTextBodyDescriptionContainer =
-                toDoTextBodyDescription?.text.toString()
+                toDoTextBodyDescription.text
             val clipboard = activity
 
                 ?.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
@@ -239,12 +239,7 @@ class AddToDoFragment : AppDefaultFragment(),
         mDateEditText = view.findViewById<EditText>(R.id.newTodoDateEditText).apply {
             setOnClickListener {
                 hideKeyboard(toDoTextBodyEditText)
-                val date = if (userToDoItem.toDoDate != null) {
-                    userReminderDate
-                } else {
-                    Date()
-                }
-
+                val date = userReminderDate
                 val calendar = Calendar.getInstance()
                 calendar.time = date
                 val year = calendar[Calendar.YEAR]
@@ -261,12 +256,7 @@ class AddToDoFragment : AppDefaultFragment(),
         mTimeEditText = view.findViewById<EditText>(R.id.newTodoTimeEditText).apply {
             setOnClickListener {
                 hideKeyboard(toDoTextBodyEditText)
-                val date = if (userToDoItem.toDoDate != null) {
-                    userReminderDate
-                } else {
-                    Date()
-                }
-
+                val date = userReminderDate
                 val calendar = Calendar.getInstance()
                 calendar.time = date
                 val hour = calendar[Calendar.HOUR_OF_DAY]
@@ -284,7 +274,7 @@ class AddToDoFragment : AppDefaultFragment(),
     }
 
     private fun setDateAndTimeEditText() {
-        if (userToDoItem.hasReminder() && userReminderDate != null) {
+        if (userToDoItem.hasReminder && userReminderDate != null) {
             val userDate = formatDate("d MMM, yyyy", userReminderDate)
             val formatToUse = if (DateFormat.is24HourFormat(context)) {
                 "k:mm"
@@ -417,7 +407,7 @@ class AddToDoFragment : AppDefaultFragment(),
                 dateString, timeString, amPmString
             )
 
-        reminderTextView?.setTextColor(
+        reminderTextView.setTextColor(
             ResourcesCompat.getColor(
                 resources,
                 R.color.secondary_text,
@@ -435,11 +425,16 @@ class AddToDoFragment : AppDefaultFragment(),
                 userSelectedText[0]
                     .uppercaseChar().toString() +
                         userSelectedText.substring(1)
-            userToDoItem.toDoText = capitalizedString
-            userToDoItem.setToDoDescription(userEnteredDescription)
+
+            userToDoItem = userToDoItem.copy(
+                text = capitalizedString,
+                description = userEnteredDescription
+            )
         } else {
-            userToDoItem.toDoText = userSelectedText
-            userToDoItem.setToDoDescription(userEnteredDescription)
+            userToDoItem = userToDoItem.copy(
+                text = userSelectedText,
+                description = userEnteredDescription
+            )
         }
 
         val calendar = Calendar.getInstance()
@@ -447,9 +442,11 @@ class AddToDoFragment : AppDefaultFragment(),
         calendar[Calendar.SECOND] = 0
         userReminderDate = calendar.time
 
-        userToDoItem.setHasReminder(userHasReminder)
-        userToDoItem.toDoDate = userReminderDate
-        userToDoItem.todoColor = userColor
+        userToDoItem = userToDoItem.copy(
+            hasReminder = userHasReminder,
+            date = userReminderDate!!,
+            color = userColor
+        )
 
         intent.putExtra(MainFragment.TODOITEM, userToDoItem)
         activity?.setResult(result, intent)
