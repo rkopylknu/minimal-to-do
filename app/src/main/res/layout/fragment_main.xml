@@ -1,66 +1,53 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:orientation="vertical"
-              android:gravity="center"
-              android:layout_height="match_parent">
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!--<include layout="@layout/base_toolbar"/>-->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/myCoordinatorLayout"
+    <com.rkopylknu.minimaltodo.Utility.RecyclerViewEmptySupport
+        android:id="@+id/rv_to_do_items"
         android:layout_width="match_parent"
-        android:gravity="center"
         android:layout_height="match_parent"
-        >
+        android:background="?attr/android:colorBackground"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:itemCount="5"
+        tools:listitem="@layout/item_to_do_item" />
 
-        <LinearLayout
-            android:id="@+id/toDoEmptyView"
-            android:orientation="vertical"
-            android:gravity="center"
+    <LinearLayout
+        android:id="@+id/ll_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:srcCompat="@drawable/empty_view_bg" />
+
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:src="@drawable/empty_view_bg"
-                android:layout_width="100dp"
-                android:layout_height="100dp"/>
-
-            <TextView
-                android:text="@string/no_to_dos"
-                android:textColor="@color/secondary_text"
-                android:textSize="16sp"
-                android:paddingTop="4dp"
-                android:paddingBottom="8dp"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-
-        <!--<include layout="@layout/base_toolbar"/>-->
-
-
-        <!--</android.support.design.widget.AppBarLayout>-->
-
-
-        <com.rkopylknu.minimaltodo.Utility.RecyclerViewEmptySupport
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:id="@+id/toDoRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:src="@drawable/ic_add_white_24dp"
-            android:id="@+id/addToDoItemFAB"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_gravity="bottom|end"
+            android:gravity="center"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="@string/no_to_dos"
+            android:textColor="@color/secondary_text"
+            android:textSize="16sp" />
 
-            />
+    </LinearLayout>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_to_do_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:backgroundTint="?attr/colorAccent"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+        app:srcCompat="@drawable/ic_add_filled" />
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

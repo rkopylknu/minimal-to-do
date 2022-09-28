@@ -1,80 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <include layout="@layout/base_toolbar" />
-
-    <!--Put all strings to string.xml-->
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/toDoReminderTextViewBody"
-        android:layout_width="match_parent"
+        android:id="@+id/tv_text"
+        android:layout_width="0dp"
         android:layout_height="150dp"
-        android:layout_below="@id/toolbar"
         android:background="@color/primary"
         android:ellipsize="middle"
-        android:gravity="center|start"
-        android:paddingLeft="16dp"
-        android:text="@string/example"
+        android:gravity="start|center"
+        android:paddingHorizontal="16dp"
         android:textColor="@color/icons"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Clean my room" />
+
+    <TextView
+        android:id="@+id/tv_snooze"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="2dp"
+        android:layout_weight="1"
+        android:drawablePadding="8dp"
+        android:padding="8dp"
+        android:text="@string/snooze"
+        android:textSize="16sp"
+        app:drawableStartCompat="@drawable/ic_snooze_outlined"
+        app:layout_constraintEnd_toStartOf="@id/spinner_snooze_time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_text" />
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/spinner_snooze_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="16dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toBottomOf="@id/tv_snooze"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_snooze"
+        app:layout_constraintTop_toTopOf="@id/tv_snooze" />
 
     <Button
-        android:id="@+id/toDoReminderRemoveButton"
-        android:layout_width="match_parent"
+        android:id="@+id/btn_remove"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/button_pressed_background"
+        android:background="@drawable/bg_selectable_primary"
         android:text="@string/remove"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/toDoReminderLinearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/toDoReminderRemoveButton"
-        android:layout_below="@id/toDoReminderTextViewBody"
-        android:gravity="start"
-        android:orientation="horizontal"
-        android:paddingTop="24dp">
-
-        <TextView
-            android:id="@+id/reminderViewSnoozeTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="2dp"
-            android:layout_weight="1.5"
-            android:drawableLeft="@drawable/ic_snooze_black_24dp"
-            android:drawablePadding="8dp"
-            android:gravity="start"
-            android:padding="8dp"
-            android:text="@string/snooze"
-            android:textSize="16sp" />
-
-        <!--
-        <fr.ganfra.materialspinner.MaterialSpinner
-            android:id="@+id/todoReminderSnoozeSpinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="16dp"
-            android:layout_weight="1.5"
-            app:ms_highlightColor="?attr/colorAccent"
-            />
-        -->
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/todoReminderSnoozeSpinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="16dp"
-            android:layout_weight="1.5" />
-
-    </LinearLayout>
-
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,18 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".AddToDo.AddToDoActivity">
 
-
-
+    <item
+        android:id="@+id/item_preferences"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
 
     <item
-        android:id="@+id/preferences"
-        android:title="@string/action_settings"
-        app:showAsAction="never"
-        />
-
-    <item android:title="@string/about"
-        android:id="@+id/aboutMeMenuItem"
-        app:showAsAction="never"
-        />
-
+        android:id="@+id/item_about_me"
+        android:title="@string/about"
+        app:showAsAction="never" />
 </menu>

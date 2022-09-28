@@ -3,27 +3,19 @@ package com.rkopylknu.minimaltodo.About
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.annotation.LayoutRes
-import com.rkopylknu.minimaltodo.AppDefault.AppDefaultFragment
+import androidx.fragment.app.Fragment
+import com.rkopylknu.minimaltodo.BuildConfig
 import com.rkopylknu.minimaltodo.R
 
-class AboutFragment : AppDefaultFragment() {
+class AboutFragment : Fragment(R.layout.fragment_about) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val appVersion = (activity as? AboutActivity)?.appVersion ?: ""
-
-        val versionTextView =
-            view.findViewById<TextView>(R.id.aboutVersionTextView)
-        versionTextView.text = getString(R.string.app_version, appVersion)
-    }
-
-    @LayoutRes
-    override fun layoutRes() = R.layout.fragment_about
-
-    companion object {
-
-        fun newInstance() = AboutFragment()
+        val tvVersion = view.findViewById<TextView>(R.id.tv_version)
+        tvVersion.text = getString(
+            R.string.version,
+            BuildConfig.VERSION_NAME
+        )
     }
 }

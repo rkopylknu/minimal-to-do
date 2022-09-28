@@ -1,57 +1,73 @@
 package com.rkopylknu.minimaltodo.Settings
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceFragment
-import androidx.preference.CheckBoxPreference
-import androidx.preference.PreferenceFragmentCompat
-import com.rkopylknu.minimaltodo.Main.MainFragment
+import android.view.View
+import android.widget.CheckBox
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.edit
+import androidx.fragment.app.Fragment
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.Utility.PreferenceKeys
+import com.rkopylknu.minimaltodo.util.*
 
-class SettingsFragment :
-    PreferenceFragmentCompat(),
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.preferences_layout)
+    private lateinit var clNightMode: ConstraintLayout
+    private lateinit var tvNightModeState: TextView
+    private lateinit var cbNightMode: CheckBox
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupUI()
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        val preferenceKeys = PreferenceKeys(resources)
-        if (key != preferenceKeys.night_mode_pref_key) return
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
 
-        val themeEditor = requireActivity().getSharedPreferences(
-            MainFragment.THEME_PREFERENCES,
-            Context.MODE_PRIVATE
-        ).edit()
+        val theme = requireActivity()
+            .getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(PREFS_THEME_KEY, PREFS_THEME_LIGHT)!!
 
-        // We tell our MainLayout to recreate itself because mode has changed
-        themeEditor.putBoolean(MainFragment.RECREATE_ACTIVITY, true)
-
-        val checkBoxPreference =
-            findPreference<CheckBoxPreference>(preferenceKeys.night_mode_pref_key)!!
-
-        themeEditor.putString(
-            MainFragment.THEME_SAVED,
-            if (checkBoxPreference.isChecked) MainFragment.DARKTHEME
-            else MainFragment.LIGHTTHEME
-        )
-
-        themeEditor.apply()
-        requireActivity().recreate()
+        // Theme state is shown in onViewStateRestored
+        // to override restored view state
+        showThemeState(theme)
     }
 
-    override fun onResume() {
-        super.onResume()
-        preferenceManager.sharedPreferences
-            ?.registerOnSharedPreferenceChangeListener(this)
+    private fun setupUI() {
+        requireView().run {
+            clNightMode = findViewById(R.id.cl_night_mode)
+            tvNightModeState = findViewById(R.id.tv_night_mode_state)
+            cbNightMode = findViewById(R.id.cb_night_mode)
+        }
+
+        clNightMode.setOnClickListener {
+            switchTheme()
+            requireActivity().recreate()
+        }
     }
 
-    override fun onPause() {
-        super.onPause()
-        preferenceManager.sharedPreferences
-            ?.unregisterOnSharedPreferenceChangeListener(this)
+    private fun switchTheme() {
+        val preferences = requireActivity()
+            .getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        val theme = preferences.getString(PREFS_THEME_KEY, PREFS_THEME_LIGHT)!!
+
+        val oppositeTheme =
+            if (theme == PREFS_THEME_LIGHT) PREFS_THEME_DARK else PREFS_THEME_LIGHT
+
+        preferences.edit(commit = true) {
+            putString(PREFS_THEME_KEY, oppositeTheme)
+        }
+    }
+
+    private fun showThemeState(theme: String) {
+        if (theme == PREFS_THEME_LIGHT) {
+            tvNightModeState.text = getString(R.string.night_mode_off)
+            cbNightMode.isChecked = false
+        } else {
+            tvNightModeState.text = getString(R.string.night_mode_on)
+            cbNightMode.isChecked = true
+        }
     }
 }

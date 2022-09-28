@@ -1,227 +1,202 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:animateLayoutChanges="true"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    >
+    android:layout_height="match_parent"
+    tools:context=".AddToDo.AddToDoFragment">
 
-    <include layout="@layout/base_toolbar"/>
+    <FrameLayout
+        android:id="@+id/fl_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/colorPrimary"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@id/layout_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="0.5">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:gravity="center">
 
-            <LinearLayout
-                android:id="@+id/editTextParentLinearLayout"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_text"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight=".5"
-                android:background="?attr/colorPrimary"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="32dp"
+                android:hint="@string/title"
+                android:inputType="textAutoCorrect|textCapSentences"
+                android:lines="2"
+                android:maxLength="30"
+                android:maxLines="3" />
 
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.rkopylknu.minimaltodo.Utility.CustomTextInputLayout
-                    android:id="@+id/toDoCustomTextInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    app:hintTextAppearance="@style/FloatingLabelTextAppearance">
+    </FrameLayout>
 
-                    <EditText
-                        android:id="@+id/userToDoEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginLeft="32dp"
-                        android:layout_marginRight="32dp"
-                        android:gravity="start|bottom"
-                        android:hint="@string/title"
-                        android:inputType="textAutoCorrect|textCapSentences"
-                        android:lines="2"
-                        android:maxLength="30"
-                        android:maxLines="3"
-                        android:textColor="@color/icons" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        app:layout_constraintBottom_toTopOf="@id/layout_reminder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fl_text">
 
-                </com.rkopylknu.minimaltodo.Utility.CustomTextInputLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_description"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginHorizontal="32dp"
+            android:hint="@string/description"
+            android:inputType="textMultiLine|textCapSentences"
+            android:lines="2"
+            android:maxLines="3"
+            android:scrollbars="vertical" />
 
-            </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_reminder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingStart="36dp"
+        android:paddingEnd="36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_description"
+        app:layout_constraintVertical_weight="1.5">
 
-            <com.rkopylknu.minimaltodo.Utility.CustomTextInputLayout
-                android:id="@+id/toDoCustomTextInput01"
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/ll_toggle_reminder"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="30dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/cl_reminder"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_weight="0.5">
+
+            <ImageButton
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight=".4"
+                android:background="@android:color/transparent"
+                android:padding="8dp"
+                app:srcCompat="@drawable/ic_add_alarm_outlined"
+                app:tint="#727272" />
 
-                android:gravity="center"
-                android:paddingTop="20dp"
-                app:hintTextAppearance="@style/FloatingLabelTextAppearance">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:padding="8dp"
+                android:text="@string/remind_me"
+                android:textColor="@color/secondary_text"
+                android:textSize="16sp" />
 
-                <EditText
-                    android:id="@+id/userToDoDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:layout_marginLeft="32dp"
-                    android:layout_marginRight="32dp"
-                    android:layout_weight="0"
-                    android:gravity="start|bottom"
-                    android:hint="@string/description"
-                    android:inputType="textMultiLine|textCapSentences"
-                    android:lines="2"
-                    android:maxLines="3"
-                    android:scrollbars="vertical"
-                    android:textColor="@color/icons" />
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_add_reminder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="8dp" />
 
-            </com.rkopylknu.minimaltodo.Utility.CustomTextInputLayout>
-
-            <LinearLayout
-                android:id="@+id/todoReminderAndDateContainerLayout"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1.5"
-                android:orientation="vertical">
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginLeft="36dp"
-                    android:layout_marginRight="36dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_weight=".5"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageButton
-                        android:id="@+id/userToDoReminderIconImageButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".4"
-                        android:background="@android:color/transparent"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_add_alarm_grey_200_24dp" />
-
-                    <TextView
-                        android:id="@+id/userToDoRemindMeTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:gravity="start"
-                        android:paddingBottom="8dp"
-                        android:paddingLeft="8dp"
-                        android:paddingRight="8dp"
-                        android:paddingTop="8dp"
-                        android:text="@string/remind_me"
-                        android:textColor="@color/secondary_text"
-                        android:textSize="16sp" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/toDoHasDateSwitchCompat"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:padding="8dp" />
-
-                    <Button
-                        android:id="@+id/copyclipboard"
-                        android:layout_width="0dp"
-                        android:layout_height="28dp"
-                        android:layout_margin="8dp"
-                        android:layout_weight=".37"
-                        android:background="@drawable/ic_content_copy_black_24dp"
-                        android:backgroundTint="@color/grey600"
-                        android:padding="8dp"
-                        android:visibility="visible" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/toDoEnterDateLinearLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginLeft="36dp"
-                    android:layout_marginRight="36dp"
-                    android:layout_weight="1"
-                    android:animateLayoutChanges="true"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="top">
-
-
-                        <EditText
-                            android:id="@+id/newTodoDateEditText"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1.5"
-                            android:editable="false"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:gravity="center"
-                            android:textIsSelectable="false" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight=".2"
-                            android:gravity="center"
-                            android:padding="4dp"
-                            android:text="\@"
-                            android:textColor="?attr/colorAccent" />
-
-                        <EditText
-                            android:id="@+id/newTodoTimeEditText"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:editable="false"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:gravity="center"
-                            android:textIsSelectable="false" />
-
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/newToDoDateTimeReminderTextView"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="2"
-                        android:gravity="start"
-                        android:text="@string/remind_date_and_time"
-                        android:textColor="@color/secondary_text"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-
-            </LinearLayout>
+            <Button
+                android:id="@+id/btn_copy"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_margin="8dp"
+                android:layout_weight=".37"
+                android:background="@drawable/ic_content_copy_outlined"
+                android:padding="8dp"
+                app:backgroundTint="@color/grey600" />
 
         </LinearLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/makeToDoFloatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_send_white_18dp"
-            app:fabSize="normal"
-            android:layout_gravity="bottom|right" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_reminder"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_toggle_reminder"
+            app:layout_constraintVertical_weight="1">
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</LinearLayout>
+            <EditText
+                android:id="@+id/et_reminder_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toStartOf="@id/separator_at_symbol"
+                app:layout_constraintHorizontal_weight="1.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/separator_at_symbol"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:text="@string/_at"
+                android:textColor="?attr/colorAccent"
+                app:layout_constraintBaseline_toBaselineOf="@id/et_reminder_date"
+                app:layout_constraintEnd_toStartOf="@id/et_reminder_time"
+                app:layout_constraintHorizontal_weight=".2"
+                app:layout_constraintStart_toEndOf="@id/et_reminder_date"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/et_reminder_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:textAlignment="center"
+                app:layout_constraintBaseline_toBaselineOf="@id/et_reminder_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/separator_at_symbol"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_reminder_set"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/secondary_text"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/et_reminder_date"
+                app:layout_constraintVertical_bias="0.25" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_save_to_do_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_send_filled"
+        app:tint="@android:color/white" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,5 @@
 package com.rkopylknu.minimaltodo.AddToDo
 
-import android.animation.Animator
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.ClipData
@@ -9,508 +7,275 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.text.format.DateFormat
-import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.InputMethodManager
+import android.view.animation.AnimationUtils
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
-import androidx.appcompat.widget.Toolbar
-import androidx.core.app.NavUtils
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
-import androidx.fragment.app.setFragmentResult
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.rkopylknu.minimaltodo.AppDefault.AppDefaultFragment
-import com.rkopylknu.minimaltodo.Main.MainFragment
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.Utility.ReminderService
+import com.rkopylknu.minimaltodo.Utility.StoreRetrieveData
 import com.rkopylknu.minimaltodo.Utility.ToDoItem
-import java.text.SimpleDateFormat
-import java.util.*
+import com.rkopylknu.minimaltodo.AddToDo.AddToDoActivity.Companion.TO_DO_ITEM_KEY
+import com.rkopylknu.minimaltodo.util.TO_DO_ITEM_COLORS
+import com.rkopylknu.minimaltodo.util.getColorCompat
+import kotlinx.datetime.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-class AddToDoFragment : AppDefaultFragment(),
-    DatePickerDialog.OnDateSetListener,
-    TimePickerDialog.OnTimeSetListener {
+class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
 
-    private lateinit var toDoTextBodyEditText: EditText
-    private lateinit var toDoTextBodyDescription: EditText
-    private lateinit var toDoDateSwitch: SwitchCompat
-    private lateinit var userDateSpinnerContainingLinearLayout: LinearLayout
-    private lateinit var reminderTextView: TextView
-    private lateinit var combinationText: String
-    private lateinit var mDateEditText: EditText
-    private lateinit var mTimeEditText: EditText
-    private lateinit var copyClipboard: Button
-    private lateinit var userToDoItem: ToDoItem
-    private lateinit var toDoSendFloatingActionButton: FloatingActionButton
-    private lateinit var containerLayout: LinearLayout
-    private lateinit var userSelectedText: String
-    private var userEnteredDescription: String = ""
-    private var userHasReminder = false
-    private var userReminderDate: Date? = null
-    private var userColor = 0
+    private var toDoItem: ToDoItem? = null
+
+    private var reminder: LocalDateTime? = null
+
+    private lateinit var etText: EditText
+    private lateinit var etDescription: EditText
+    private lateinit var switchAddReminder: SwitchCompat
+    private lateinit var etReminderDate: EditText
+    private lateinit var etReminderTime: EditText
+    private lateinit var fabSaveToDoItem: FloatingActionButton
+    private lateinit var btnCopy: Button
+    private lateinit var clReminder: ConstraintLayout
+    private lateinit var tvReminderSet: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val theme = activity
-            ?.getSharedPreferences(
-                MainFragment.THEME_PREFERENCES,
-                Context.MODE_PRIVATE
-            )
-            ?.getString(MainFragment.THEME_SAVED, MainFragment.LIGHTTHEME)
+        val toDoItemJson = requireActivity().intent?.getStringExtra(TO_DO_ITEM_KEY)
+        toDoItem = toDoItemJson?.let { Json.decodeFromString(it) }
 
-        activity?.setTheme(
-            if (theme == MainFragment.LIGHTTHEME) {
-                R.style.CustomStyle_LightTheme
-            } else {
-                R.style.CustomStyle_DarkTheme
+        setupUI()
+    }
+
+    private fun setupUI() {
+        requireView().run {
+            etText = findViewById(R.id.et_text)
+            etDescription = findViewById(R.id.et_description)
+            switchAddReminder = findViewById(R.id.switch_add_reminder)
+            etReminderDate = findViewById(R.id.et_reminder_date)
+            etReminderTime = findViewById(R.id.et_reminder_time)
+            fabSaveToDoItem = findViewById(R.id.fab_save_to_do_item)
+            btnCopy = findViewById(R.id.btn_copy)
+            clReminder = findViewById(R.id.cl_reminder)
+            tvReminderSet = findViewById(R.id.tv_reminder_set)
+        }
+
+        toDoItem?.run {
+            etText.setText(text)
+            etDescription.setText(description)
+            this@AddToDoFragment.reminder = reminder
+            displayReminder()
+        }
+
+        switchAddReminder.run {
+            isChecked = reminder != null
+            setOnClickListener {
+                if (switchAddReminder.isChecked) {
+                    if (reminder == null) {
+                        reminder = createDefaultReminder()
+                    }
+                } else {
+                    reminder = null
+                }
+
+                displayReminder()
             }
-        )
-
-        val cross = ResourcesCompat.getDrawable(
-            resources,
-            R.drawable.ic_clear_white_24dp,
-            activity?.theme
-        )?.apply {
-            colorFilter = BlendModeColorFilterCompat
-                .createBlendModeColorFilterCompat(
-                    ResourcesCompat.getColor(resources, R.color.icons, activity?.theme),
-                    BlendModeCompat.SRC_ATOP
-                )
         }
 
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        (activity as? AppCompatActivity)?.run {
-            setSupportActionBar(toolbar)
-            supportActionBar?.run {
-                elevation = 0f
-                setDisplayShowTitleEnabled(false)
-                setDisplayHomeAsUpEnabled(true)
-                setHomeAsUpIndicator(cross)
-            }
+        fabSaveToDoItem.setOnClickListener {
+            trySaveToDoItem()
+            requireActivity().finish()
         }
 
-        userToDoItem = if (Build.VERSION.SDK_INT >= 33) {
-            requireActivity().intent!!
-                .getSerializableExtra(MainFragment.TODOITEM, ToDoItem::class.java)!!
-        } else {
-            requireActivity().intent!!
-                .getSerializableExtra(MainFragment.TODOITEM) as ToDoItem
-        }
-        userToDoItem.run {
-            userSelectedText = text
-            userEnteredDescription = description
-            userHasReminder = hasReminder
-            userReminderDate = date
-            userColor = color
+        btnCopy.setOnClickListener {
+            copyToDoItemToClipboard()
         }
 
-        val reminderIconImageButton =
-            view.findViewById<ImageButton>(R.id.userToDoReminderIconImageButton)
-        val reminderRemindMeTextView =
-            view.findViewById<TextView>(R.id.userToDoRemindMeTextView)
-
-        if (theme == MainFragment.DARKTHEME) {
-            reminderIconImageButton
-                .setImageDrawable(
-                    ResourcesCompat.getDrawable(
-                        resources,
-                        R.drawable.ic_alarm_add_white_24dp,
-                        activity?.theme
-                    )
-                )
-            reminderRemindMeTextView.setTextColor(Color.WHITE)
-        }
-
-        copyClipboard = view.findViewById(R.id.copyclipboard)
-        containerLayout =
-            view.findViewById(R.id.todoReminderAndDateContainerLayout)
-        userDateSpinnerContainingLinearLayout =
-            view.findViewById(R.id.toDoEnterDateLinearLayout)
-        toDoTextBodyEditText = view.findViewById(R.id.userToDoEditText)
-        toDoTextBodyDescription = view.findViewById(R.id.userToDoDescription)
-        toDoDateSwitch = view.findViewById(R.id.toDoHasDateSwitchCompat)
-        toDoSendFloatingActionButton =
-            view.findViewById(R.id.makeToDoFloatingActionButton)
-        reminderTextView =
-            view.findViewById(R.id.newToDoDateTimeReminderTextView)
-
-        copyClipboard.setOnClickListener {
-            val toDoTextContainer = toDoTextBodyEditText.text
-            val toDoTextBodyDescriptionContainer =
-                toDoTextBodyDescription.text
-            val clipboard = activity
-
-                ?.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            combinationText = "Title : $toDoTextContainer\n" +
-                    "Description : $toDoTextBodyDescriptionContainer\n" +
-                    " -Copied From MinimalToDo"
-            val clip: ClipData = ClipData.newPlainText("text", combinationText)
-
-            clipboard?.setPrimaryClip(clip)
-            Toast.makeText(
-                context,
-                "Copied To Clipboard!",
-                Toast.LENGTH_SHORT
+        etReminderDate.setOnClickListener {
+            val now = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            DatePickerDialog(
+                requireContext(), dateTimePickerListener,
+                now.year, now.monthNumber, now.dayOfMonth
             ).show()
         }
 
-        containerLayout.setOnClickListener {
-            hideKeyboard(toDoTextBodyEditText)
-            hideKeyboard(toDoTextBodyDescription)
+        etReminderTime.setOnClickListener {
+            val now = Clock.System.now()
+                .toLocalDateTime(TimeZone.currentSystemDefault()).time
+
+            TimePickerDialog(
+                requireContext(), dateTimePickerListener,
+                now.hour, now.minute,
+                DateFormat.is24HourFormat(requireContext())
+            ).show()
         }
-
-        if (userHasReminder && userReminderDate != null) {
-            setReminderTextView()
-            setEnterDateLayoutVisibleWithAnimations(true)
-        }
-        if (userReminderDate == null) {
-            toDoDateSwitch.isChecked = false
-            reminderTextView.visibility = View.INVISIBLE
-        }
-
-        toDoTextBodyEditText.requestFocus()
-        toDoTextBodyEditText.setText(userSelectedText)
-        toDoTextBodyDescription.setText(userEnteredDescription)
-
-        val inputMethodManager =
-            activity?.getSystemService(
-                Context.INPUT_METHOD_SERVICE
-            ) as InputMethodManager
-
-        toDoTextBodyEditText.run {
-            setSelection(length())
-            inputMethodManager.showSoftInput(this, 0)
-            addTextChangedListener(object : TextWatcher {
-
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                    userSelectedText = s.toString()
-                }
-
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-                override fun afterTextChanged(s: Editable) {}
-            })
-
-            setText(userEnteredDescription)
-            setSelection(length())
-        }
-
-        setEnterDateLayoutVisible(toDoDateSwitch.isChecked)
-
-        toDoDateSwitch.isChecked = userHasReminder && userReminderDate != null
-        toDoDateSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (!isChecked) {
-                userReminderDate = null
-            }
-            userHasReminder = isChecked
-
-            setDateAndTimeEditText()
-            setEnterDateLayoutVisibleWithAnimations(isChecked)
-
-            hideKeyboard(toDoTextBodyEditText)
-            hideKeyboard(toDoTextBodyDescription)
-        }
-
-        toDoSendFloatingActionButton.setOnClickListener {
-            toDoTextBodyEditText.run {
-                if (length() <= 0) {
-                    setError(getString(R.string.todo_error))
-                } else if (
-                    userReminderDate != null &&
-                    userReminderDate!!.before(Date())
-                ) {
-                    makeResult(Activity.RESULT_CANCELED)
-                } else {
-                    makeResult(Activity.RESULT_OK)
-                    activity?.finish()
-                }
-            }
-            hideKeyboard(toDoTextBodyEditText)
-            hideKeyboard(toDoTextBodyDescription)
-        }
-
-        mDateEditText = view.findViewById<EditText>(R.id.newTodoDateEditText).apply {
-            setOnClickListener {
-                hideKeyboard(toDoTextBodyEditText)
-                val date = userReminderDate
-                val calendar = Calendar.getInstance()
-                calendar.time = date
-                val year = calendar[Calendar.YEAR]
-                val month = calendar[Calendar.MONTH]
-                val day = calendar[Calendar.DAY_OF_MONTH]
-
-                DatePickerDialog(
-                    context, this@AddToDoFragment,
-                    year, month, day
-                ).show()
-            }
-        }
-
-        mTimeEditText = view.findViewById<EditText>(R.id.newTodoTimeEditText).apply {
-            setOnClickListener {
-                hideKeyboard(toDoTextBodyEditText)
-                val date = userReminderDate
-                val calendar = Calendar.getInstance()
-                calendar.time = date
-                val hour = calendar[Calendar.HOUR_OF_DAY]
-                val minute = calendar[Calendar.MINUTE]
-
-                TimePickerDialog(
-                    context, this@AddToDoFragment,
-                    hour, minute,
-                    DateFormat.is24HourFormat(context)
-                ).show()
-            }
-        }
-
-        setDateAndTimeEditText()
     }
 
-    private fun setDateAndTimeEditText() {
-        if (userToDoItem.hasReminder && userReminderDate != null) {
-            val userDate = formatDate("d MMM, yyyy", userReminderDate)
-            val formatToUse = if (DateFormat.is24HourFormat(context)) {
-                "k:mm"
+    private fun createDefaultReminder(): LocalDateTime {
+        val atNextHour = Clock.System.now()
+            .plus(DateTimePeriod(hours = 1), TimeZone.UTC)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+
+        return LocalDateTime(
+            atNextHour.date,
+            LocalTime(atNextHour.hour + 1, minute = 0)
+        )
+    }
+
+    private fun displayReminder() {
+        etReminderDate.setText(reminder?.date?.toString() ?: "")
+        etReminderTime.setText(reminder?.time?.toString() ?: "")
+        tvReminderSet.text = reminder?.let { reminder ->
+            val now = Clock.System.now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+
+            if (reminder >= now) {
+                tvReminderSet.setTextColor(
+                    getColorCompat(R.color.secondary_text)
+                )
+                getString(R.string.reminder_set_for, reminder.toString())
             } else {
-                "h:mm a"
+                tvReminderSet.setTextColor(Color.RED)
+                getString(R.string.entered_date_in_past)
             }
-            val userTime = formatDate(formatToUse, userReminderDate)
-            mTimeEditText.setText(userTime)
-            mDateEditText.setText(userDate)
-        } else {
-            mDateEditText.setText(getString(R.string.date_reminder_default))
-            val time24 = DateFormat.is24HourFormat(context)
-            val cal = Calendar.getInstance()
-            if (time24) {
-                cal[Calendar.HOUR_OF_DAY] = cal[Calendar.HOUR_OF_DAY] + 1
-            } else {
-                cal[Calendar.HOUR] = cal[Calendar.HOUR] + 1
-            }
-            cal[Calendar.MINUTE] = 0
-            userReminderDate = cal.time
-            val timeString: String = if (time24) {
-                formatDate("k:mm", userReminderDate)
-            } else {
-                formatDate("h:mm a", userReminderDate)
-            }
-            mTimeEditText.setText(timeString)
-        }
-    }
+        } ?: ""
 
-    private val themeSet: String
-        get() = requireActivity()
-            .getSharedPreferences(
-                MainFragment.THEME_PREFERENCES,
-                Context.MODE_PRIVATE
-            )
-            .getString(MainFragment.THEME_SAVED, MainFragment.LIGHTTHEME)!!
+        // show / hide reminder layout
+        clReminder.visibility =
+            if (reminder != null) View.VISIBLE else View.INVISIBLE
 
-    private fun hideKeyboard(et: EditText?) {
-        val inputMethodManager = activity
-            ?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(et?.windowToken, 0)
-    }
-
-    private fun setDate(year: Int, month: Int, day: Int) {
-        val calendar = Calendar.getInstance()
-        val hour: Int
-        val minute: Int
-
-        val reminderCalendar = Calendar.getInstance()
-        reminderCalendar[year, month] = day
-
-        if (reminderCalendar.before(calendar)) return
-        if (userReminderDate != null) {
-            calendar.time = userReminderDate
-        }
-
-        hour = if (DateFormat.is24HourFormat(context)) {
-            calendar[Calendar.HOUR_OF_DAY]
-        } else {
-            calendar[Calendar.HOUR]
-        }
-        minute = calendar[Calendar.MINUTE]
-        calendar[year, month, day, hour] = minute
-
-        userReminderDate = calendar.time
-
-        setReminderTextView()
-        setDateEditText()
-    }
-
-    private fun setTime(hour: Int, minute: Int) {
-        val calendar = Calendar.getInstance()
-        if (userReminderDate != null) {
-            calendar.time = userReminderDate
-        }
-
-        val year = calendar[Calendar.YEAR]
-        val month = calendar[Calendar.MONTH]
-        val day = calendar[Calendar.DAY_OF_MONTH]
-        calendar[year, month, day, hour, minute] = 0
-
-        userReminderDate = calendar.time
-
-        setReminderTextView()
-        setTimeEditText()
-    }
-
-    private fun setDateEditText() {
-        val dateFormat = "d MMM, yyyy"
-        mDateEditText.setText(formatDate(dateFormat, userReminderDate))
-    }
-
-    private fun setTimeEditText() {
-        val dateFormat: String =
-            if (DateFormat.is24HourFormat(context)) "k:mm"
-            else "h:mm a"
-        mTimeEditText.setText(formatDate(dateFormat, userReminderDate))
-    }
-
-    private fun setReminderTextView() {
-        if (userReminderDate != null) {
-            reminderTextView.visibility = View.INVISIBLE
-            return
-        }
-
-        reminderTextView.visibility = View.VISIBLE
-
-        if (userReminderDate!!.before(Date())) {
-            reminderTextView.text = getString(R.string.date_error_check_again)
-            reminderTextView.setTextColor(Color.RED)
-            return
-        }
-
-        val date: Date = userReminderDate!!
-        val dateString = formatDate("d MMM, yyyy", date)
-
-        val timeString: String
-        var amPmString = ""
-
-        if (DateFormat.is24HourFormat(context)) {
-            timeString = formatDate("k:mm", date)
-        } else {
-            timeString = formatDate("h:mm", date)
-            amPmString = formatDate("a", date)
-        }
-
-        val finalString =
-            String.format(
-                getString(R.string.remind_date_and_time),
-                dateString, timeString, amPmString
-            )
-
-        reminderTextView.setTextColor(
-            ResourcesCompat.getColor(
-                resources,
-                R.color.secondary_text,
-                activity?.theme
+        clReminder.startAnimation(
+            AnimationUtils.loadAnimation(
+                requireContext(),
+                if (reminder != null) R.anim.fade_in_500
+                else R.anim.fade_out_500
             )
         )
-        reminderTextView.text = finalString
     }
 
-    private fun makeResult(result: Int) {
-        val intent = Intent()
+    private val dateTimePickerListener = object :
+        DatePickerDialog.OnDateSetListener,
+        TimePickerDialog.OnTimeSetListener {
 
-        if (userSelectedText.isNotEmpty()) {
-            val capitalizedString =
-                userSelectedText[0]
-                    .uppercaseChar().toString() +
-                        userSelectedText.substring(1)
-
-            userToDoItem = userToDoItem.copy(
-                text = capitalizedString,
-                description = userEnteredDescription
-            )
-        } else {
-            userToDoItem = userToDoItem.copy(
-                text = userSelectedText,
-                description = userEnteredDescription
-            )
+        override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
+            reminder = reminder?.run {
+                LocalDateTime(
+                    date = LocalDate(year, month, day),
+                    time = time
+                )
+            }
+            displayReminder()
         }
 
-        val calendar = Calendar.getInstance()
-        calendar.time = userReminderDate
-        calendar[Calendar.SECOND] = 0
-        userReminderDate = calendar.time
+        override fun onTimeSet(picker: TimePicker?, hour: Int, minute: Int) {
+            reminder = reminder?.run {
+                LocalDateTime(
+                    date = date,
+                    time = LocalTime(hour, minute)
+                )
+            }
+            displayReminder()
+        }
+    }
 
-        userToDoItem = userToDoItem.copy(
-            hasReminder = userHasReminder,
-            date = userReminderDate!!,
-            color = userColor
+    private fun isValidInput(): Boolean {
+        if (etText.text.isNullOrEmpty()) return false
+
+        reminder?.let { reminder ->
+            val now = Clock.System.now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+
+            if (reminder < now) return false
+        }
+
+        return true
+    }
+
+    private fun trySaveToDoItem() {
+        if (!isValidInput()) return
+
+        val lastStoredId = StoreRetrieveData.getLastToDoItemId(requireContext())
+
+        val newToDoItem = ToDoItem(
+            id = toDoItem?.id
+                ?: (lastStoredId?.plus(1))
+                ?: TO_DO_ITEM_DEFAULT_ID,
+            text = etText.text.toString(),
+            description = etDescription.text.toString(),
+            reminder = reminder,
+            color = toDoItem?.color
+                ?: TO_DO_ITEM_COLORS.random()
         )
 
-        intent.putExtra(MainFragment.TODOITEM, userToDoItem)
-        activity?.setResult(result, intent)
+        StoreRetrieveData.mutate(requireContext()) {
+            remove(toDoItem)
+            add(newToDoItem)
+        }
+        toDoItem?.let { tryCancelAlarm(it) }
+        tryCreateAlarm(newToDoItem)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.home -> {
-                if (NavUtils.getParentActivityName(requireActivity()) != null) {
-                    makeResult(Activity.RESULT_CANCELED)
-                    NavUtils.navigateUpFromSameTask(requireActivity())
-                }
-                hideKeyboard(toDoTextBodyEditText)
-                true
+    private fun tryCreateAlarm(toDoItem: ToDoItem) {
+        if (toDoItem.reminder == null) return
+
+        val createNotificationIntent =
+            Intent(
+                requireContext(),
+                ReminderService::class.java
+            ).apply {
+                action = ReminderService.ACTION_CREATE
+                putExtra(
+                    ReminderService.TO_DO_ITEM_KEY,
+                    Json.encodeToString(toDoItem)
+                )
             }
-            else -> super.onOptionsItemSelected(item)
-        }
+
+        requireActivity().startService(createNotificationIntent)
     }
 
-    override fun onDateSet(datePicker: DatePicker, year: Int, month: Int, day: Int) {
-        setDate(year, month, day)
-    }
+    private fun tryCancelAlarm(toDoItem: ToDoItem) {
+        if (toDoItem.reminder == null) return
 
-    override fun onTimeSet(timePicker: TimePicker, hour: Int, minute: Int) {
-        setTime(hour, minute)
-    }
-
-    private fun setEnterDateLayoutVisible(checked: Boolean) {
-        userDateSpinnerContainingLinearLayout.visibility =
-            if (checked) View.VISIBLE else View.INVISIBLE
-    }
-
-    private fun setEnterDateLayoutVisibleWithAnimations(checked: Boolean) {
-        if (checked) {
-            setReminderTextView()
-        }
-        userDateSpinnerContainingLinearLayout.animate()
-            .alpha(if (checked) 1f else 0f)
-            .setDuration(500)
-            .setListener(
-                object : Animator.AnimatorListener {
-                    override fun onAnimationStart(animation: Animator) {
-                        userDateSpinnerContainingLinearLayout.visibility =
-                            if (checked) View.VISIBLE else View.INVISIBLE
-                    }
-
-                    override fun onAnimationEnd(animation: Animator) {}
-                    override fun onAnimationCancel(animation: Animator) {}
-                    override fun onAnimationRepeat(animation: Animator) {}
-                }
+        val cancelAlarmIntent = Intent(
+            requireContext(),
+            ReminderService::class.java
+        ).apply {
+            action = ReminderService.ACTION_CANCEL
+            putExtra(
+                ReminderService.TO_DO_ITEM_KEY,
+                Json.encodeToString(toDoItem)
             )
+        }
+        requireActivity().startService(cancelAlarmIntent)
     }
 
-    override fun layoutRes() = R.layout.fragment_add_to_do
+    private fun copyToDoItemToClipboard() {
+        val clipboard = requireActivity()
+            .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        val toDoItemString = "Title : ${etText.text}\n" +
+                "Description : ${etDescription.text}\n" +
+                " -Copied From MinimalToDo"
+
+        clipboard.setPrimaryClip(
+            ClipData.newPlainText("text", toDoItemString)
+        )
+
+        Toast.makeText(
+            context,
+            "Copied To Clipboard!",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
     companion object {
 
-        fun formatDate(formatString: String?, dateToFormat: Date?): String {
-            val simpleDateFormat = SimpleDateFormat(formatString)
-            return simpleDateFormat.format(dateToFormat)
-        }
-
-        fun newInstance(): AddToDoFragment {
-            return AddToDoFragment()
-        }
+        const val TO_DO_ITEM_DEFAULT_ID = 0L
     }
 }

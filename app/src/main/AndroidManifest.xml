@@ -1,27 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.rkopylknu.minimaltodo" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.rkopylknu.minimaltodo">
 
-    <uses-permission android:name="ANDROID.PERMISSION.INTERNET"/>
-    <uses-permission android:name="ANDROID.PERMISSION.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!--We set theme to DarkTheme because when the app opens it shows
-    a white screen if our theme here is LightTheme. The screen is shown for
-    about 1 second, but it's jarring if users have set Night Mode to true.
-    -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/CustomStyle.DarkTheme"
-        >
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MinimalToDo.Light">
+
         <activity
             android:name="com.rkopylknu.minimaltodo.Main.MainActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.MinimalToDo.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,30 +22,39 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.rkopylknu.minimaltodo.AddToDo.AddToDoActivity"
-            android:screenOrientation="portrait"
-            android:parentActivityName="com.rkopylknu.minimaltodo.Main.MainActivity"
-            />
+        <activity
+            android:name="com.rkopylknu.minimaltodo.AddToDo.AddToDoActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MinimalToDo.Light" />
 
-        <activity android:name="com.rkopylknu.minimaltodo.About.AboutActivity"
-            android:label="@string/app_name"
-            android:parentActivityName="com.rkopylknu.minimaltodo.Main.MainActivity"
-            />
+        <activity
+            android:name="com.rkopylknu.minimaltodo.Reminder.ReminderActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MinimalToDo.Light" />
 
-        <activity android:name="com.rkopylknu.minimaltodo.Reminder.ReminderActivity"
-            android:label="@string/app_name"
-            />
+        <activity
+            android:name="com.rkopylknu.minimaltodo.Settings.SettingsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MinimalToDo.Light" />
 
-        <service android:name="com.rkopylknu.minimaltodo.Utility.TodoNotificationService"
-            />
-        <service android:name="com.rkopylknu.minimaltodo.Utility.DeleteNotificationService"
-            />
-        <activity android:name="com.rkopylknu.minimaltodo.Settings.SettingsActivity"
-            android:parentActivityName="com.rkopylknu.minimaltodo.Main.MainActivity"
+        <activity
+            android:name="com.rkopylknu.minimaltodo.About.AboutActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MinimalToDo.Light" />
 
-            />
+        <service
+            android:name=".Utility.ReminderService"
+            android:exported="true">
+
+            <intent-filter>
+
+                <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.CREATE" />
+                <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.CANCEL" />
+                <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.NOTIFY" />
+                <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.DELETE" />
+            </intent-filter>
+        </service>
 
     </application>
-
 
 </manifest>

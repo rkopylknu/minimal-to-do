@@ -1,30 +1,22 @@
 package com.rkopylknu.minimaltodo.AppDefault
 
+import android.content.Context
 import android.os.Bundle
-import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.util.SHARED_PREFS_NAME
+import com.rkopylknu.minimaltodo.util.PREFS_THEME_KEY
+import com.rkopylknu.minimaltodo.util.PREFS_THEME_LIGHT
+import com.rkopylknu.minimaltodo.util.PREFS_TO_THEMES
 
-abstract class AppDefaultActivity : AppCompatActivity() {
+open class AppDefaultActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(contentViewLayoutRes())
-        setUpInitialFragment(savedInstanceState)
+
+        val themePrefs =
+            getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(PREFS_THEME_KEY, PREFS_THEME_LIGHT)!!
+
+        setTheme(PREFS_TO_THEMES[themePrefs]!!)
     }
-
-    private fun setUpInitialFragment(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, createInitialFragment())
-                .commit()
-        }
-    }
-
-    @LayoutRes
-    protected abstract fun contentViewLayoutRes(): Int
-
-    protected abstract fun createInitialFragment(): Fragment
 }
