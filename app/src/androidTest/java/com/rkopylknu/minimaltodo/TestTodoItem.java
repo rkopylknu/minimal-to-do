@@ -23,7 +23,7 @@
 
 package com.rkopylknu.minimaltodo;
 
-import com.rkopylknu.minimaltodo.Utility.ToDoItemLegacy;
+import com.rkopylknu.minimaltodo.util.ToDoItemLegacy;
 
 import junit.framework.TestCase;
 

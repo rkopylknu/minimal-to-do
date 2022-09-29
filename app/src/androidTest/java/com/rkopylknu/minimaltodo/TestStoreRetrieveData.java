@@ -26,9 +26,9 @@ package com.rkopylknu.minimaltodo;
 import android.content.Context;
 import android.test.ActivityUnitTestCase;
 
-import com.rkopylknu.minimaltodo.Main.MainActivity;
-import com.rkopylknu.minimaltodo.Utility.StoreRetrieveData;
-import com.rkopylknu.minimaltodo.Utility.ToDoItemLegacy;
+import com.rkopylknu.minimaltodo.ui.main.MainActivity;
+import com.rkopylknu.minimaltodo.data.storage.StoreRetrieveDataImpl;
+import com.rkopylknu.minimaltodo.util.ToDoItemLegacy;
 
 import org.json.JSONArray;
 
@@ -64,7 +64,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
         mOriginalData = new ArrayList<>();
 
         // Save the original data and wipe out the storage
-        StoreRetrieveData dataStorage = getDataStorage();
+        StoreRetrieveDataImpl dataStorage = getDataStorage();
         try {
             ArrayList<ToDoItemLegacy> items = dataStorage.loadFromFile();
 
@@ -86,7 +86,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
         super.tearDown();
 
         // Let's restore the data we might have wiped out during setUp()...
-        StoreRetrieveData dataStorage = getDataStorage();
+        StoreRetrieveDataImpl dataStorage = getDataStorage();
         dataStorage.saveToFile(mOriginalData);
     }
 
@@ -94,7 +94,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
      * We should have an empty data storage at hand for the starters
      */
     public void testPreconditions() {
-        StoreRetrieveData dataStorage = getDataStorage();
+        StoreRetrieveDataImpl dataStorage = getDataStorage();
 
         ArrayList<ToDoItemLegacy> items = null;
         try {
@@ -110,7 +110,7 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
      * Write items to data storage and ensure those same items can be retrieved from the storage.
      */
     public void testWritingToAndReadingFromTheDataStorage() {
-        StoreRetrieveData dataStorage = getDataStorage();
+        StoreRetrieveDataImpl dataStorage = getDataStorage();
         ArrayList<ToDoItemLegacy> retrievedItems = new ArrayList<>();
 
         // Persist the test data
@@ -159,15 +159,15 @@ public class TestStoreRetrieveData extends ActivityUnitTestCase<MainActivity> {
      */
     public void testArrayListToJsonArrayConversion() {
         try {
-            JSONArray array = StoreRetrieveData.toJSONArray(mTestData);
+            JSONArray array = StoreRetrieveDataImpl.toJSONArray(mTestData);
             assertEquals(mTestData.size(), array.length());
         } catch (Exception e) {
             fail("Exception thrown when converting to JSONArray: " + e.getMessage());
         }
     }
 
-    private StoreRetrieveData getDataStorage() {
+    private StoreRetrieveDataImpl getDataStorage() {
         Context context = getInstrumentation().getTargetContext();
-        return new StoreRetrieveData(context, MainActivity.FILENAME);
+        return new StoreRetrieveDataImpl(context, MainActivity.FILENAME);
     }
 }

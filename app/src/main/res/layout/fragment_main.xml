@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.rkopylknu.minimaltodo.Utility.RecyclerViewEmptySupport
+    <com.rkopylknu.minimaltodo.ui.util.RecyclerViewEmptySupport
         android:id="@+id/rv_to_do_items"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center|top"
     android:orientation="vertical"
-    tools:context=".About.AboutFragment"
+    tools:context=".ui.about.AboutFragment"
     android:background="?attr/android:colorBackground">
 
     <ImageView

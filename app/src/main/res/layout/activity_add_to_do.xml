@@ -22,7 +22,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
-        android:name="com.rkopylknu.minimaltodo.AddToDo.AddToDoFragment"
+        android:name="com.rkopylknu.minimaltodo.ui.add.AddToDoFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -4,6 +4,7 @@
     package="com.rkopylknu.minimaltodo">
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,7 +13,7 @@
         android:theme="@style/Theme.MinimalToDo.Light">
 
         <activity
-            android:name="com.rkopylknu.minimaltodo.Main.MainActivity"
+            android:name="com.rkopylknu.minimaltodo.ui.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MinimalToDo.Light">
             <intent-filter>
@@ -23,27 +24,27 @@
         </activity>
 
         <activity
-            android:name="com.rkopylknu.minimaltodo.AddToDo.AddToDoActivity"
+            android:name="com.rkopylknu.minimaltodo.ui.add.AddToDoActivity"
             android:exported="true"
             android:theme="@style/Theme.MinimalToDo.Light" />
 
         <activity
-            android:name="com.rkopylknu.minimaltodo.Reminder.ReminderActivity"
+            android:name="com.rkopylknu.minimaltodo.ui.reminder.ReminderActivity"
             android:exported="true"
             android:theme="@style/Theme.MinimalToDo.Light" />
 
         <activity
-            android:name="com.rkopylknu.minimaltodo.Settings.SettingsActivity"
+            android:name="com.rkopylknu.minimaltodo.ui.settings.SettingsActivity"
             android:exported="true"
             android:theme="@style/Theme.MinimalToDo.Light" />
 
         <activity
-            android:name="com.rkopylknu.minimaltodo.About.AboutActivity"
+            android:name="com.rkopylknu.minimaltodo.ui.about.AboutActivity"
             android:exported="true"
             android:theme="@style/Theme.MinimalToDo.Light" />
 
         <service
-            android:name=".Utility.ReminderService"
+            android:name=".util.ReminderService"
             android:exported="true">
 
             <intent-filter>
