@@ -13,6 +13,7 @@
         <item name="colorSwitchThumbNormal">@color/grey300</item>
         <item name="android:colorForeground">@color/grey600</item>
         <item name="android:colorBackground">@color/primary_lightest</item>
+        <item name="colorControlNormal">@color/icons</item>
     </style>
 
 </resources>

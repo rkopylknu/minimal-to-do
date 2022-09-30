@@ -1,6 +1,5 @@
 package com.rkopylknu.minimaltodo.ui.reminder
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -11,27 +10,20 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatSpinner
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
-import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
-import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
-import com.rkopylknu.minimaltodo.ui.main.MainActivity
-import com.rkopylknu.minimaltodo.ui.reminder.ReminderActivity.Companion.TO_DO_ITEM_KEY
-import kotlinx.datetime.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
-class ReminderFragment : Fragment(R.layout.fragment_reminder) {
+class ReminderFragment(
+    private val toDoItem: ToDoItem,
+) : Fragment(R.layout.fragment_reminder), MenuProvider {
 
     private val viewModel: ReminderViewModel by viewModels {
-        val toDoItem = Json.decodeFromString<ToDoItem>(
-            requireActivity().intent.getStringExtra(TO_DO_ITEM_KEY)!!
-        )
-
         (requireActivity().application as App).run {
             val deleteItemUseCase = DeleteItemUseCaseImpl(
                 toDoItemRepository,
@@ -57,7 +49,7 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
+        requireActivity().addMenuProvider(this, viewLifecycleOwner)
 
         setupUI()
     }
@@ -85,7 +77,7 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder) {
 
                 override fun onItemSelected(
                     p0: AdapterView<*>?, p1: View?,
-                    index: Int, p3: Long
+                    index: Int, p3: Long,
                 ) {
                     viewModel.onSetSnoozeOption(index)
                 }
@@ -96,25 +88,20 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder) {
 
         btnRemove.setOnClickListener {
             viewModel.onDeleteItem()
-            requireActivity().finish()
+            parentFragmentManager.popBackStack()
         }
     }
 
-    private fun setDelayedReminder() {
-        viewModel.onDelayReminder()
-
-        val navigateToMainActivityIntent =
-            Intent(requireContext(), MainActivity::class.java)
-        startActivity(navigateToMainActivityIntent)
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_reminder, menu)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_reminder, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.item_done -> setDelayedReminder()
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.item_done -> {
+                viewModel.onDelayReminder()
+                parentFragmentManager.popBackStack()
+            }
             else -> return false
         }
         return true

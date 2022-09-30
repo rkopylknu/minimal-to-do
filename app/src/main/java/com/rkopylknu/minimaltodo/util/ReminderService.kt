@@ -8,11 +8,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.data.storage.StoreRetrieveDataImpl
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
-import com.rkopylknu.minimaltodo.ui.reminder.ReminderActivity
+import com.rkopylknu.minimaltodo.ui.MainActivity
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.decodeFromString
@@ -94,14 +93,16 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
     }
 
     private fun displayAlarm(toDoItem: ToDoItem) {
-        val startReminderActivityIntent = PendingIntent.getActivity(
+        val showReminderIntent = PendingIntent.getActivity(
             this,
             toDoItem.hashCode(),
-            Intent(this, ReminderActivity::class.java)
-                .putExtra(
-                    TO_DO_ITEM_KEY,
+            Intent(this, MainActivity::class.java).apply {
+                action = MainActivity.SHOW_REMINDER_ACTION
+                putExtra(
+                    MainActivity.TO_DO_ITEM_KEY,
                     Json.encodeToString(toDoItem)
-                ),
+                )
+            },
             PendingIntent.FLAG_UPDATE_CURRENT
         )
         val deleteReminderIntent = PendingIntent.getService(
@@ -121,7 +122,7 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
             .setContentTitle(toDoItem.text)
             .setContentText("")
             .setSmallIcon(R.drawable.ic_done_filled)
-            .setContentIntent(startReminderActivityIntent)
+            .setContentIntent(showReminderIntent)
             .setDeleteIntent(deleteReminderIntent)
             .setAutoCancel(true)
             .build()

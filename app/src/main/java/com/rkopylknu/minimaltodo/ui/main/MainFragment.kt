@@ -1,9 +1,13 @@
 package com.rkopylknu.minimaltodo.ui.main
 
-import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -12,19 +16,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
-import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
-import com.rkopylknu.minimaltodo.domain.usecase.DisplayItemsUseCase
-import com.rkopylknu.minimaltodo.domain.usecase.ReplaceItemUseCase
-import com.rkopylknu.minimaltodo.domain.usecase.RestoreItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
-import com.rkopylknu.minimaltodo.ui.add.AddToDoActivity
+import com.rkopylknu.minimaltodo.ui.about.AboutFragment
+import com.rkopylknu.minimaltodo.ui.add.AddToDoFragment
+import com.rkopylknu.minimaltodo.ui.settings.SettingsFragment
 import com.rkopylknu.minimaltodo.ui.util.RecyclerViewEmptySupport
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
-class MainFragment : Fragment(R.layout.fragment_main) {
+class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
     private val viewModel: MainViewModel by viewModels {
         (requireActivity().application as App).run {
@@ -50,6 +49,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().addMenuProvider(this, viewLifecycleOwner)
+
         setupUI()
     }
 
@@ -58,6 +59,31 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
         adapter.submitDataSet(viewModel.toDoItems)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_main, menu)
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.item_about_me -> {
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace(R.id.fragment_container_view, AboutFragment())
+                    addToBackStack(null)
+                }
+            }
+            R.id.item_preferences -> {
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace(R.id.fragment_container_view, SettingsFragment())
+                    addToBackStack(null)
+                }
+            }
+            else -> return false
+        }
+        return true
     }
 
     private fun setupUI() {
@@ -84,14 +110,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun onToDoItemClick(toDoItem: ToDoItem) {
-        val editToDoIntent = Intent(
-            requireActivity(),
-            AddToDoActivity::class.java
-        ).putExtra(
-            AddToDoActivity.TO_DO_ITEM_KEY,
-            Json.encodeToString(toDoItem)
-        )
-        startActivity(editToDoIntent)
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container_view, AddToDoFragment(toDoItem))
+            addToBackStack(null)
+        }
     }
 
     private fun onToDoItemMoved(from: Int, to: Int) {
@@ -120,11 +143,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun onAddToDoItem() {
-        val createToDoIntent = Intent(
-            requireActivity(),
-            AddToDoActivity::class.java
-        )
-        startActivity(createToDoIntent)
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container_view, AddToDoFragment())
+            addToBackStack(null)
+        }
     }
 
     private fun buildItemTouchHelper() = ItemTouchHelper(

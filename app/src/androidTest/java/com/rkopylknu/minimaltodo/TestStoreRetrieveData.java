@@ -26,7 +26,7 @@ package com.rkopylknu.minimaltodo;
 import android.content.Context;
 import android.test.ActivityUnitTestCase;
 
-import com.rkopylknu.minimaltodo.ui.main.MainActivity;
+import com.rkopylknu.minimaltodo.ui.MainActivity;
 import com.rkopylknu.minimaltodo.data.storage.StoreRetrieveDataImpl;
 import com.rkopylknu.minimaltodo.util.ToDoItemLegacy;
 

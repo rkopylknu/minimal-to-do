@@ -1,6 +1,8 @@
 package com.rkopylknu.minimaltodo.util
 
 import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -12,3 +14,8 @@ import java.util.*
 
 fun Fragment.getColorCompat(@ColorRes id: Int) =
     ResourcesCompat.getColor(resources, id, activity?.theme)
+
+fun Fragment.getDrawableCompat(@DrawableRes id: Int) =
+    ResourcesCompat.getDrawable(resources, id, activity?.theme)
+
+val Fragment.appCompatActivity get() = (activity as? AppCompatActivity)

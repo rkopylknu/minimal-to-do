@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.rkopylknu.minimaltodo.BuildConfig
 import com.rkopylknu.minimaltodo.R
+import androidx.appcompat.app.AppCompatActivity
 
 class AboutFragment : Fragment(R.layout.fragment_about) {
 

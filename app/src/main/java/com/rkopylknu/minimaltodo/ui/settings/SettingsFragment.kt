@@ -1,5 +1,6 @@
 package com.rkopylknu.minimaltodo.ui.settings
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.CheckBox
@@ -9,13 +10,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.ui.MainActivity
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     private val viewModel: SettingsViewModel by viewModels {
         SettingsViewModel.Factory(
-            (requireActivity().application as App)
-                .appPreferencesManager
+            (requireActivity().application as App).appPreferencesManager
         )
     }
 
