@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -25,35 +26,26 @@ import kotlinx.serialization.json.Json
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
-    private lateinit var displayItemsUseCase: DisplayItemsUseCase
-    private lateinit var replaceItemUseCase: ReplaceItemUseCase
-    private lateinit var deleteItemUseCase: DeleteItemUseCase
-    private lateinit var restoreItemUseCase: RestoreItemUseCase
-
-    private lateinit var appPreferencesManager: AppPreferencesManager
-
-    private var toDoItems: List<ToDoItem> = emptyList()
+    private val viewModel: MainViewModel by viewModels {
+        (requireActivity().application as App).run {
+            MainViewModel.Factory(
+                DisplayItemsUseCaseImpl(toDoItemRepository),
+                ReplaceItemUseCaseImpl(toDoItemRepository),
+                DeleteItemUseCaseImpl(
+                    toDoItemRepository,
+                    DeleteAlarmUseCaseImpl(applicationContext)
+                ),
+                RestoreItemUseCaseImpl(
+                    toDoItemRepository,
+                    CreateAlarmUseCaseImpl(applicationContext)
+                ),
+                appPreferencesManager
+            )
+        }
+    }
 
     private lateinit var rvToDoItems: RecyclerViewEmptySupport
     private lateinit var fabAddToDoItem: FloatingActionButton
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        (requireActivity().application as App).run {
-            displayItemsUseCase = DisplayItemsUseCaseImpl(toDoItemRepository)
-            replaceItemUseCase = ReplaceItemUseCaseImpl(toDoItemRepository)
-            deleteItemUseCase = DeleteItemUseCaseImpl(
-                toDoItemRepository,
-                DeleteAlarmUseCaseImpl(applicationContext)
-            )
-            restoreItemUseCase = RestoreItemUseCaseImpl(
-                toDoItemRepository,
-                CreateAlarmUseCaseImpl(applicationContext)
-            )
-            this@MainFragment.appPreferencesManager = appPreferencesManager
-        }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -64,8 +56,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onResume() {
         super.onResume()
 
-        toDoItems = displayItemsUseCase.execute()
-        (rvToDoItems.adapter as ToDoItemAdapter).submitDataSet(toDoItems)
+        val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
+        adapter.submitDataSet(viewModel.toDoItems)
     }
 
     private fun setupUI() {
@@ -77,10 +69,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         rvToDoItems.run {
             adapter = ToDoItemAdapter(
                 onItemClick = ::onToDoItemClick,
-                theme = appPreferencesManager.get().theme
-            ).apply {
-                submitDataSet(toDoItems)
-            }
+                theme = viewModel.theme
+            )
 
             setEmptyView(requireView().findViewById(R.id.ll_empty))
             showEmptyView()
@@ -105,18 +95,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun onToDoItemMoved(from: Int, to: Int) {
-        replaceItemUseCase.execute(from, to)
+        viewModel.onReplaceItem(from, to)
         rvToDoItems.adapter?.notifyItemMoved(from, to)
     }
 
     private fun onToDoItemSwiped(position: Int) {
-        val swipedToDoItem = toDoItems[position]
+        val swipedToDoItem = viewModel.toDoItems[position]
 
-        deleteItemUseCase.execute(swipedToDoItem)
-        toDoItems = displayItemsUseCase.execute()
+        viewModel.onDeleteItem(swipedToDoItem, position)
 
         val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
-        adapter.submitDataSet(toDoItems)
+        adapter.submitDataSet(viewModel.toDoItems)
 
         Snackbar.make(
             requireView(),
@@ -124,9 +113,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             Snackbar.LENGTH_LONG
         )
             .setAction(getString(R.string.undo)) {
-                restoreItemUseCase.execute(swipedToDoItem, position)
-                toDoItems = displayItemsUseCase.execute()
-                adapter.submitDataSet(toDoItems)
+                viewModel.onRestoreItem()
+                adapter.submitDataSet(viewModel.toDoItems)
             }
             .show()
     }

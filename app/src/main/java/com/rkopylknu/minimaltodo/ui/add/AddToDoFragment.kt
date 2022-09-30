@@ -14,6 +14,7 @@ import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
@@ -29,12 +30,32 @@ import kotlinx.serialization.json.Json
 
 class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
 
-    private lateinit var createItemUseCase: CreateItemUseCase
-    private lateinit var updateItemUseCase: UpdateItemUseCase
+    private val viewModel: AddToDoViewModel by viewModels {
+        val toDoItemJson = requireActivity()
+            .intent?.getStringExtra(TO_DO_ITEM_KEY)
+        val toDoItem = toDoItemJson
+            ?.let { Json.decodeFromString<ToDoItem>(it) }
 
-    private var toDoItem: ToDoItem? = null
-
-    private var reminder: LocalDateTime? = null
+        (requireActivity().application as App).run {
+            AddToDoViewModel.Factory(
+                CreateItemUseCaseImpl(
+                    toDoItemRepository,
+                    CreateAlarmUseCaseImpl(applicationContext),
+                    ValidateItemUseCaseImpl()
+                ),
+                UpdateItemUseCaseImpl(
+                    toDoItemRepository,
+                    ValidateItemUseCaseImpl(),
+                    DeleteItemUseCaseImpl(
+                        toDoItemRepository,
+                        DeleteAlarmUseCaseImpl(applicationContext)
+                    ),
+                    CreateAlarmUseCaseImpl(applicationContext)
+                ),
+                toDoItem
+            )
+        }
+    }
 
     private lateinit var etText: EditText
     private lateinit var etDescription: EditText
@@ -46,32 +67,8 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
     private lateinit var clReminder: ConstraintLayout
     private lateinit var tvReminderSet: TextView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        (requireActivity().application as App).run {
-            createItemUseCase = CreateItemUseCaseImpl(
-                toDoItemRepository,
-                CreateAlarmUseCaseImpl(applicationContext),
-                ValidateItemUseCaseImpl()
-            )
-            updateItemUseCase = UpdateItemUseCaseImpl(
-                toDoItemRepository,
-                ValidateItemUseCaseImpl(),
-                DeleteItemUseCaseImpl(
-                    toDoItemRepository,
-                    DeleteAlarmUseCaseImpl(applicationContext)
-                ),
-                CreateAlarmUseCaseImpl(applicationContext)
-            )
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val toDoItemJson = requireActivity().intent?.getStringExtra(TO_DO_ITEM_KEY)
-        toDoItem = toDoItemJson?.let { Json.decodeFromString(it) }
 
         setupUI()
     }
@@ -89,30 +86,31 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
             tvReminderSet = findViewById(R.id.tv_reminder_set)
         }
 
-        toDoItem?.run {
+        viewModel.toDoItem?.run {
             etText.setText(text)
             etDescription.setText(description)
-            this@AddToDoFragment.reminder = reminder
             displayReminder()
         }
 
         switchAddReminder.run {
-            isChecked = reminder != null
+            isChecked = viewModel.reminder != null
             setOnClickListener {
                 if (switchAddReminder.isChecked) {
-                    if (reminder == null) {
-                        reminder = createDefaultReminder()
+                    if (viewModel.reminder == null) {
+                        viewModel.setDefaultReminder()
                     }
                 } else {
-                    reminder = null
+                    viewModel.resetReminder()
                 }
-
                 displayReminder()
             }
         }
 
         fabSaveToDoItem.setOnClickListener {
-            saveToDoItem()
+            viewModel.onSaveItem(
+                etText.text.toString(),
+                etDescription.text.toString()
+            )
             requireActivity().finish()
         }
 
@@ -140,21 +138,11 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         }
     }
 
-    private fun createDefaultReminder(): LocalDateTime {
-        val atNextHour = Clock.System.now()
-            .plus(DateTimePeriod(hours = 1), TimeZone.UTC)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-
-        return LocalDateTime(
-            atNextHour.date,
-            LocalTime(atNextHour.hour + 1, minute = 0)
-        )
-    }
-
     private fun displayReminder() {
+        val reminder = viewModel.reminder
         etReminderDate.setText(reminder?.date?.toString() ?: "")
         etReminderTime.setText(reminder?.time?.toString() ?: "")
-        tvReminderSet.text = reminder?.let { reminder ->
+        tvReminderSet.text = reminder?.let {
             val now = Clock.System.now()
                 .toLocalDateTime(TimeZone.currentSystemDefault())
 
@@ -187,40 +175,13 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         TimePickerDialog.OnTimeSetListener {
 
         override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
-            reminder = reminder?.run {
-                LocalDateTime(
-                    date = LocalDate(year, month, day),
-                    time = time
-                )
-            }
+            viewModel.onDateSet(year, month, day)
             displayReminder()
         }
 
         override fun onTimeSet(picker: TimePicker?, hour: Int, minute: Int) {
-            reminder = reminder?.run {
-                LocalDateTime(
-                    date = date,
-                    time = LocalTime(hour, minute)
-                )
-            }
+            viewModel.onTimeSet(hour, minute)
             displayReminder()
-        }
-    }
-
-    private fun saveToDoItem() {
-        val newItem = ToDoItem(
-            id = CreateItemUseCase.EMPTY_ID,
-            text = etText.text.toString(),
-            description = etDescription.text.toString(),
-            reminder = reminder,
-            color = CreateItemUseCase.EMPTY_COLOR
-        )
-        toDoItem.let { oldItem ->
-            if (oldItem == null) {
-                createItemUseCase.execute(newItem)
-            } else {
-                updateItemUseCase.execute(oldItem, newItem)
-            }
         }
     }
 
@@ -228,12 +189,14 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         val clipboard = requireActivity()
             .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
-        val toDoItemString = "Title : ${etText.text}\n" +
-                "Description : ${etDescription.text}\n" +
-                " -Copied From MinimalToDo"
-
         clipboard.setPrimaryClip(
-            ClipData.newPlainText("text", toDoItemString)
+            ClipData.newPlainText(
+                "text",
+                viewModel.getClipboardText(
+                    etText.text.toString(),
+                    etDescription.text.toString()
+                )
+            )
         )
 
         Toast.makeText(

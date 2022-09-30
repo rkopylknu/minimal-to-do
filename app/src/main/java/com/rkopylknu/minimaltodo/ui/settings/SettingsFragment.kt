@@ -6,24 +6,22 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
-    private lateinit var appPreferencesManager: AppPreferencesManager
+    private val viewModel: SettingsViewModel by viewModels {
+        SettingsViewModel.Factory(
+            (requireActivity().application as App)
+                .appPreferencesManager
+        )
+    }
 
     private lateinit var clNightMode: ConstraintLayout
     private lateinit var tvNightModeState: TextView
     private lateinit var cbNightMode: CheckBox
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        appPreferencesManager = (requireActivity().application as App)
-            .appPreferencesManager
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,7 +34,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         // Theme state is shown in onViewStateRestored
         // to override restored view state
-        showThemeState(appPreferencesManager.get().theme)
+        showThemeState(viewModel.theme)
     }
 
     private fun setupUI() {
@@ -47,20 +45,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         clNightMode.setOnClickListener {
-            switchTheme()
+            viewModel.onSwitchNightMode()
             requireActivity().recreate()
         }
-    }
-
-    private fun switchTheme() {
-        val theme = appPreferencesManager.get().theme
-        appPreferencesManager.setTheme(
-            if (theme == R.style.Theme_MinimalToDo_Light) {
-                R.style.Theme_MinimalToDo_Dark
-            } else {
-                R.style.Theme_MinimalToDo_Light
-            }
-        )
     }
 
     private fun showThemeState(theme: Int) {

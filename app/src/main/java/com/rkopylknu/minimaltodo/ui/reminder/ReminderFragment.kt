@@ -6,11 +6,13 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
@@ -25,35 +27,32 @@ import kotlinx.serialization.json.Json
 
 class ReminderFragment : Fragment(R.layout.fragment_reminder) {
 
-    private lateinit var deleteItemUseCase: DeleteItemUseCase
-    private lateinit var updateItemUseCase: UpdateItemUseCase
-
-    private lateinit var toDoItem: ToDoItem
-
-    private lateinit var tvText: TextView
-    private lateinit var spinnerSnoozeTime: AppCompatSpinner
-    private lateinit var btnRemove: Button
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        toDoItem = Json.decodeFromString(
+    private val viewModel: ReminderViewModel by viewModels {
+        val toDoItem = Json.decodeFromString<ToDoItem>(
             requireActivity().intent.getStringExtra(TO_DO_ITEM_KEY)!!
         )
 
         (requireActivity().application as App).run {
-            deleteItemUseCase = DeleteItemUseCaseImpl(
+            val deleteItemUseCase = DeleteItemUseCaseImpl(
                 toDoItemRepository,
                 DeleteAlarmUseCaseImpl(applicationContext)
             )
-            updateItemUseCase = UpdateItemUseCaseImpl(
-                toDoItemRepository,
-                ValidateItemUseCaseImpl(),
+            ReminderViewModel.Factory(
                 deleteItemUseCase,
-                CreateAlarmUseCaseImpl(applicationContext)
+                UpdateItemUseCaseImpl(
+                    toDoItemRepository,
+                    ValidateItemUseCaseImpl(),
+                    deleteItemUseCase,
+                    CreateAlarmUseCaseImpl(applicationContext)
+                ),
+                toDoItem
             )
         }
     }
+
+    private lateinit var tvText: TextView
+    private lateinit var spinnerSnoozeTime: AppCompatSpinner
+    private lateinit var btnRemove: Button
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -70,7 +69,7 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder) {
             btnRemove = findViewById(R.id.btn_remove)
         }
 
-        tvText.text = toDoItem.text
+        tvText.text = viewModel.toDoItem.text
 
         spinnerSnoozeTime.run {
             val snoozeOptionsStrings =
@@ -81,25 +80,28 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder) {
                 R.layout.item_snooze_option,
                 snoozeOptionsStrings
             )
+
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+                override fun onItemSelected(
+                    p0: AdapterView<*>?, p1: View?,
+                    index: Int, p3: Long
+                ) {
+                    viewModel.onSetSnoozeOption(index)
+                }
+
+                override fun onNothingSelected(p0: AdapterView<*>?) {}
+            }
         }
 
         btnRemove.setOnClickListener {
-            deleteItemUseCase.execute(toDoItem)
+            viewModel.onDeleteItem()
             requireActivity().finish()
         }
     }
 
-    private fun setDelayedReminder(minutes: Int) {
-        val reminder = toDoItem.reminder ?: return
-
-        val delayedReminder = TimeZone.currentSystemDefault().run {
-            reminder.toInstant()
-                .plus(DateTimePeriod(minutes = minutes), this)
-                .toLocalDateTime()
-        }
-        val newToDoItem = toDoItem.copy(reminder = delayedReminder)
-
-        updateItemUseCase.execute(toDoItem, newToDoItem)
+    private fun setDelayedReminder() {
+        viewModel.onDelayReminder()
 
         val navigateToMainActivityIntent =
             Intent(requireContext(), MainActivity::class.java)
@@ -112,18 +114,9 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.item_done -> {
-                val snoozeOption = SNOOZE_OPTIONS
-                    .get(spinnerSnoozeTime.selectedItemPosition)
-                setDelayedReminder(snoozeOption)
-            }
+            R.id.item_done -> setDelayedReminder()
             else -> return false
         }
         return true
-    }
-
-    companion object {
-
-        private val SNOOZE_OPTIONS = listOf(10, 30, 60)
     }
 }
