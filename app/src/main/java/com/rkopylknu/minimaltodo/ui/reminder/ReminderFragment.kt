@@ -12,17 +12,19 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
-class ReminderFragment(
-    private val toDoItem: ToDoItem,
-) : Fragment(R.layout.fragment_reminder), MenuProvider {
+class ReminderFragment : Fragment(R.layout.fragment_reminder), MenuProvider {
 
+    private val args: ReminderFragmentArgs by navArgs()
+    
     private val viewModel: ReminderViewModel by viewModels {
         (requireActivity().application as App).run {
             val deleteItemUseCase = DeleteItemUseCaseImpl(
@@ -37,7 +39,7 @@ class ReminderFragment(
                     deleteItemUseCase,
                     CreateAlarmUseCaseImpl(applicationContext)
                 ),
-                toDoItem
+                Json.decodeFromString(args.toDoItemJson)
             )
         }
     }
@@ -88,7 +90,10 @@ class ReminderFragment(
 
         btnRemove.setOnClickListener {
             viewModel.onDeleteItem()
-            parentFragmentManager.popBackStack()
+            findNavController().navigate(
+                ReminderFragmentDirections
+                    .actionReminderFragmentToMainFragment()
+            )
         }
     }
 
@@ -100,7 +105,10 @@ class ReminderFragment(
         when (menuItem.itemId) {
             R.id.item_done -> {
                 viewModel.onDelayReminder()
-                parentFragmentManager.popBackStack()
+                findNavController().navigate(
+                    ReminderFragmentDirections
+                        .actionReminderFragmentToMainFragment()
+                )
             }
             else -> return false
         }

@@ -15,7 +15,4 @@ import java.util.*
 fun Fragment.getColorCompat(@ColorRes id: Int) =
     ResourcesCompat.getColor(resources, id, activity?.theme)
 
-fun Fragment.getDrawableCompat(@DrawableRes id: Int) =
-    ResourcesCompat.getDrawable(resources, id, activity?.theme)
-
 val Fragment.appCompatActivity get() = (activity as? AppCompatActivity)

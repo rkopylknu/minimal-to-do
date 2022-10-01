@@ -9,6 +9,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +23,8 @@ import com.rkopylknu.minimaltodo.ui.about.AboutFragment
 import com.rkopylknu.minimaltodo.ui.add.AddToDoFragment
 import com.rkopylknu.minimaltodo.ui.settings.SettingsFragment
 import com.rkopylknu.minimaltodo.ui.util.RecyclerViewEmptySupport
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
@@ -68,18 +71,14 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             R.id.item_about_me -> {
-                parentFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace(R.id.fragment_container_view, AboutFragment())
-                    addToBackStack(null)
-                }
+                findNavController().navigate(
+                    MainFragmentDirections.actionMainFragmentToAboutFragment()
+                )
             }
             R.id.item_preferences -> {
-                parentFragmentManager.commit {
-                    setReorderingAllowed(true)
-                    replace(R.id.fragment_container_view, SettingsFragment())
-                    addToBackStack(null)
-                }
+                findNavController().navigate(
+                    MainFragmentDirections.actionMainFragmentToSettingsFragment()
+                )
             }
             else -> return false
         }
@@ -110,11 +109,11 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
     }
 
     private fun onToDoItemClick(toDoItem: ToDoItem) {
-        parentFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(R.id.fragment_container_view, AddToDoFragment(toDoItem))
-            addToBackStack(null)
-        }
+        findNavController().navigate(
+            MainFragmentDirections.actionMainFragmentToAddToDoFragment(
+                Json.encodeToString(toDoItem)
+            )
+        )
     }
 
     private fun onToDoItemMoved(from: Int, to: Int) {
@@ -143,11 +142,9 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
     }
 
     private fun onAddToDoItem() {
-        parentFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(R.id.fragment_container_view, AddToDoFragment())
-            addToBackStack(null)
-        }
+        findNavController().navigate(
+            MainFragmentDirections.actionMainFragmentToAddToDoFragment(null)
+        )
     }
 
     private fun buildItemTouchHelper() = ItemTouchHelper(
@@ -179,7 +176,7 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
             override fun onSwiped(
                 viewHolder: RecyclerView.ViewHolder,
-                direction: Int
+                direction: Int,
             ) {
                 onToDoItemSwiped(viewHolder.adapterPosition)
             }

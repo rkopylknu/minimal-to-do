@@ -6,35 +6,35 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
+import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import com.rkopylknu.minimaltodo.util.appCompatActivity
 import com.rkopylknu.minimaltodo.util.getColorCompat
-import com.rkopylknu.minimaltodo.util.getDrawableCompat
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
-class AddToDoFragment(
-    private val toDoItem: ToDoItem? = null,
-) : Fragment(R.layout.fragment_add_to_do) {
+class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
+
+    private val args: AddToDoFragmentArgs by navArgs()
 
     private val viewModel: AddToDoViewModel by viewModels {
         (requireActivity().application as App).run {
@@ -53,7 +53,7 @@ class AddToDoFragment(
                     ),
                     CreateAlarmUseCaseImpl(applicationContext)
                 ),
-                toDoItem
+                args.toDoItemJson?.let { Json.decodeFromString(it) }
             )
         }
     }
@@ -74,12 +74,12 @@ class AddToDoFragment(
         super.onViewCreated(view, savedInstanceState)
 
         appCompatActivity?.supportActionBar?.run {
-            val crossIcon = getDrawableCompat(R.drawable.ic_clear_outlined)
-                ?.applyIconsColorFilter()
-            setHomeAsUpIndicator(crossIcon)
-
             actionBarElevation = elevation
             elevation = 0f
+        }
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
         }
 
         setupUI()
@@ -123,7 +123,7 @@ class AddToDoFragment(
                 etText.text.toString(),
                 etDescription.text.toString()
             )
-            parentFragmentManager.popBackStack()
+            findNavController().navigateUp()
         }
 
         btnCopy.setOnClickListener {
@@ -218,25 +218,11 @@ class AddToDoFragment(
         ).show()
     }
 
-    private fun Drawable.applyIconsColorFilter() = apply {
-        colorFilter = BlendModeColorFilterCompat
-            .createBlendModeColorFilterCompat(
-                ResourcesCompat.getColor(
-                    resources, R.color.icons, requireActivity().theme
-                ),
-                BlendModeCompat.SRC_ATOP
-            )
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
 
-        appCompatActivity?.supportActionBar?.run {
-            val backIcon = getDrawableCompat(R.drawable.ic_back_outlined)
-                ?.applyIconsColorFilter()
-            setHomeAsUpIndicator(backIcon)
-
-            actionBarElevation?.let { elevation = it }
+        actionBarElevation?.let {
+            appCompatActivity?.supportActionBar?.elevation = it
         }
     }
 }

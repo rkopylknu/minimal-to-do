@@ -2,20 +2,24 @@ package com.rkopylknu.minimaltodo.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.commit
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
+import androidx.core.view.isVisible
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.rkopylknu.minimaltodo.App
+import com.rkopylknu.minimaltodo.NavGraphDirections
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.domain.model.ToDoItem
-import com.rkopylknu.minimaltodo.ui.main.MainFragment
-import com.rkopylknu.minimaltodo.ui.reminder.ReminderFragment
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 class MainActivity : AppCompatActivity() {
+
+    private var _navController: NavController? = null
+    private val navController get() = checkNotNull(_navController)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val appPreferencesManager =
@@ -26,16 +30,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        _navController = (supportFragmentManager
+            .findFragmentById(R.id.fragment_container_view) as NavHostFragment)
+            .navController
+
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(
-            supportFragmentManager.fragments.last() !is MainFragment
-        )
+        toolbar.setupWithNavController(navController)
 
-        supportFragmentManager.addOnBackStackChangedListener {
-            val isHome = supportFragmentManager
-                .fragments.last() is MainFragment
-            supportActionBar?.setDisplayHomeAsUpEnabled(!isHome)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            onDestinationChanged(destination)
         }
     }
 
@@ -47,28 +51,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun tryShowReminder(intent: Intent) {
-        val toDoItem = intent.getStringExtra(TO_DO_ITEM_KEY)
-            ?.let { Json.decodeFromString<ToDoItem>(it) }
+    override fun onSupportNavigateUp() =
+        navController.navigateUp() || super.onSupportNavigateUp()
 
-        check(toDoItem != null) {
+    private fun tryShowReminder(intent: Intent) {
+        val toDoItemJson = intent.getStringExtra(TO_DO_ITEM_KEY)
+
+        check(toDoItemJson != null) {
             "Can't show reminder without ToDoItem"
         }
-        supportFragmentManager.run {
-            // Clear back stack
-            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
-            commit {
-                setReorderingAllowed(true)
-                replace(R.id.fragment_container_view, ReminderFragment(toDoItem))
-                addToBackStack(null)
-            }
-        }
+        navController.navigate(
+            NavGraphDirections.actionGlobalReminderFragment(toDoItemJson)
+        )
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        supportFragmentManager.popBackStack()
-        return true
+    private fun onDestinationChanged(destination: NavDestination) {
+        supportActionBar?.run {
+            setDisplayShowHomeEnabled(destination.id == R.id.mainFragment)
+        }
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar.isVisible = destination.id != R.id.addToDoFragment
     }
 
     companion object {
