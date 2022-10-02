@@ -8,8 +8,11 @@ import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.DisplayItemsUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.ReplaceItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.RestoreItemUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val displayItemsUseCase: DisplayItemsUseCase,
     private val replaceItemUseCase: ReplaceItemUseCase,
     private val deleteItemUseCase: DeleteItemUseCase,
@@ -38,29 +41,5 @@ class MainViewModel(
         val item = lastDeletedItem ?: return
         val index = lastDeletedIndex ?: return
         restoreItemUseCase.execute(item, index)
-    }
-
-    class Factory(
-        private val displayItemsUseCase: DisplayItemsUseCase,
-        private val replaceItemUseCase: ReplaceItemUseCase,
-        private val deleteItemUseCase: DeleteItemUseCase,
-        private val restoreItemUseCase: RestoreItemUseCase,
-        private val appPreferencesManager: AppPreferencesManager
-    ) : ViewModelProvider.Factory {
-
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-                return MainViewModel(
-                    displayItemsUseCase,
-                    replaceItemUseCase,
-                    deleteItemUseCase,
-                    restoreItemUseCase,
-                    appPreferencesManager
-                ) as T
-            } else {
-                throw IllegalArgumentException("Unexpected ViewModel class")
-            }
-        }
     }
 }

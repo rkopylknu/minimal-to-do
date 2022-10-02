@@ -5,11 +5,13 @@ import android.content.Intent
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.CreateAlarmUseCase
 import com.rkopylknu.minimaltodo.util.ReminderService
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
-class CreateAlarmUseCaseImpl(
-    private val appContext: Context
+class CreateAlarmUseCaseImpl @Inject constructor(
+    @ApplicationContext private val appContext: Context
 ) : CreateAlarmUseCase {
 
     override fun execute(item: ToDoItem) {

@@ -4,8 +4,9 @@ import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.data.repository.ToDoItemRepository
 import com.rkopylknu.minimaltodo.domain.usecase.CreateAlarmUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.RestoreItemUseCase
+import javax.inject.Inject
 
-class RestoreItemUseCaseImpl(
+class RestoreItemUseCaseImpl @Inject constructor(
     private val toDoItemRepository: ToDoItemRepository,
     private val createAlarmUseCase: CreateAlarmUseCase
 ) : RestoreItemUseCase {

@@ -25,37 +25,28 @@ import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import com.rkopylknu.minimaltodo.util.appCompatActivity
 import com.rkopylknu.minimaltodo.util.getColorCompat
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
 
     private val args: AddToDoFragmentArgs by navArgs()
 
+    @Inject
+    lateinit var viewModelDaggerFactory: AddToDoViewModel.DaggerFactory
+
     private val viewModel: AddToDoViewModel by viewModels {
-        (requireActivity().application as App).run {
-            AddToDoViewModel.Factory(
-                CreateItemUseCaseImpl(
-                    toDoItemRepository,
-                    CreateAlarmUseCaseImpl(applicationContext),
-                    ValidateItemUseCaseImpl()
-                ),
-                UpdateItemUseCaseImpl(
-                    toDoItemRepository,
-                    ValidateItemUseCaseImpl(),
-                    DeleteItemUseCaseImpl(
-                        toDoItemRepository,
-                        DeleteAlarmUseCaseImpl(applicationContext)
-                    ),
-                    CreateAlarmUseCaseImpl(applicationContext)
-                ),
-                args.toDoItemJson?.let { Json.decodeFromString(it) }
-            )
-        }
+        AddToDoViewModel.getFactory(
+            viewModelDaggerFactory,
+            args.toDoItemJson?.let { Json.decodeFromString(it) }
+        )
     }
 
     private lateinit var etText: EditText

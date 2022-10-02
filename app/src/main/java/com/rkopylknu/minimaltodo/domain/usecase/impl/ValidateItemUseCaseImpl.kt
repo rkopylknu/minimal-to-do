@@ -5,8 +5,10 @@ import com.rkopylknu.minimaltodo.domain.usecase.ValidateItemUseCase
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import javax.inject.Inject
 
-class ValidateItemUseCaseImpl : ValidateItemUseCase {
+class ValidateItemUseCaseImpl
+@Inject constructor() : ValidateItemUseCase {
 
     override fun execute(item: ToDoItem): Boolean = item.run {
         if (text.isEmpty()) return false

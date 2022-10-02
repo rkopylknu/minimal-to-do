@@ -3,6 +3,8 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "org.jetbrains.kotlin.plugin.serialization" version "1.7.20-RC"
     id "androidx.navigation.safeargs"
+    id "kotlin-kapt"
+    id "com.google.dagger.hilt.android"
 }
 
 android {
@@ -49,6 +51,10 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraint_layout_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+    // Dependency Injection
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
 
     // Resolves gradle conflict
     implementation "androidx.lifecycle:lifecycle-viewmodel:$viewmodel_version"

@@ -5,9 +5,11 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.util.APP_PREFERENCES_NAME
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class AppPreferencesManagerImpl(
-    private val context: Context
+class AppPreferencesManagerImpl @Inject constructor(
+    @ApplicationContext private val context: Context
 ) : AppPreferencesManager {
 
     override fun get(): AppPreferences {

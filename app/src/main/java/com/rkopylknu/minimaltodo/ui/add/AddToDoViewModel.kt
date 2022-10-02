@@ -5,12 +5,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.CreateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.*
 
-class AddToDoViewModel(
+class AddToDoViewModel @AssistedInject constructor(
     private val createItemUseCase: CreateItemUseCase,
     private val updateItemUseCase: UpdateItemUseCase,
-    val toDoItem: ToDoItem?,
+    @Assisted val toDoItem: ToDoItem?,
 ) : ViewModel() {
 
     var reminder: LocalDateTime? = toDoItem?.reminder
@@ -71,23 +75,21 @@ class AddToDoViewModel(
                 "Description : $description\n" +
                 " -Copied From MinimalToDo"
 
-    class Factory(
-        private val createItemUseCase: CreateItemUseCase,
-        private val updateItemUseCase: UpdateItemUseCase,
-        private val toDoItem: ToDoItem?,
-    ) : ViewModelProvider.Factory {
+    @AssistedFactory
+    interface DaggerFactory {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(AddToDoViewModel::class.java)) {
-                return AddToDoViewModel(
-                    createItemUseCase,
-                    updateItemUseCase,
-                    toDoItem
-                ) as T
-            } else {
-                throw IllegalArgumentException("Unexpected ViewModel class")
+        fun create(toDoItem: ToDoItem?): AddToDoViewModel
+    }
+
+    companion object {
+
+        fun getFactory(daggerFactory: DaggerFactory, toDoItem: ToDoItem?) =
+            object : ViewModelProvider.Factory {
+
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return daggerFactory.create(toDoItem) as T
+                }
             }
-        }
     }
 }

@@ -23,28 +23,14 @@ import com.rkopylknu.minimaltodo.ui.about.AboutFragment
 import com.rkopylknu.minimaltodo.ui.add.AddToDoFragment
 import com.rkopylknu.minimaltodo.ui.settings.SettingsFragment
 import com.rkopylknu.minimaltodo.ui.util.RecyclerViewEmptySupport
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+@AndroidEntryPoint
 class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
-    private val viewModel: MainViewModel by viewModels {
-        (requireActivity().application as App).run {
-            MainViewModel.Factory(
-                DisplayItemsUseCaseImpl(toDoItemRepository),
-                ReplaceItemUseCaseImpl(toDoItemRepository),
-                DeleteItemUseCaseImpl(
-                    toDoItemRepository,
-                    DeleteAlarmUseCaseImpl(applicationContext)
-                ),
-                RestoreItemUseCaseImpl(
-                    toDoItemRepository,
-                    CreateAlarmUseCaseImpl(applicationContext)
-                ),
-                appPreferencesManager
-            )
-        }
-    }
+    private val viewModel: MainViewModel by viewModels()
 
     private lateinit var rvToDoItems: RecyclerViewEmptySupport
     private lateinit var fabAddToDoItem: FloatingActionButton

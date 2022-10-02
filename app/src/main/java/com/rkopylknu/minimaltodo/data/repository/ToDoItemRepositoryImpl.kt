@@ -3,8 +3,9 @@ package com.rkopylknu.minimaltodo.data.repository
 import com.rkopylknu.minimaltodo.data.storage.StoreRetrieveData
 import com.rkopylknu.minimaltodo.data.storage.mutate
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
+import javax.inject.Inject
 
-class ToDoItemRepositoryImpl(
+class ToDoItemRepositoryImpl @Inject constructor(
     private val storeRetrieveData: StoreRetrieveData
 ) : ToDoItemRepository {
 

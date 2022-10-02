@@ -6,8 +6,9 @@ import com.rkopylknu.minimaltodo.domain.usecase.CreateAlarmUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.CreateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.ValidateItemUseCase
 import com.rkopylknu.minimaltodo.util.TO_DO_ITEM_COLORS
+import javax.inject.Inject
 
-class CreateItemUseCaseImpl(
+class CreateItemUseCaseImpl @Inject constructor(
     private val toDoItemRepository: ToDoItemRepository,
     private val createAlarmUseCase: CreateAlarmUseCase,
     private val validateItemUseCase: ValidateItemUseCase

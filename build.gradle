@@ -14,6 +14,9 @@ buildscript{
         material_version = "1.6.1"
         constraint_layout_version = "2.1.4"
         nav_version = "2.5.2"
+
+        // Dependency Injection
+        hilt_version = "2.44"
     }
     dependencies {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
@@ -24,6 +27,7 @@ plugins {
     id 'com.android.application' version '7.2.2' apply false
     id 'com.android.library' version '7.2.2' apply false
     id 'org.jetbrains.kotlin.android' version '1.7.10' apply false
+    id "com.google.dagger.hilt.android" version "$hilt_version" apply false
 }
 
 task clean(type: Delete) {

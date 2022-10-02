@@ -18,30 +18,24 @@ import androidx.navigation.fragment.navArgs
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ReminderFragment : Fragment(R.layout.fragment_reminder), MenuProvider {
 
     private val args: ReminderFragmentArgs by navArgs()
-    
+
+    @Inject
+    lateinit var viewModelDaggerFactory: ReminderViewModel.DaggerFactory
+
     private val viewModel: ReminderViewModel by viewModels {
-        (requireActivity().application as App).run {
-            val deleteItemUseCase = DeleteItemUseCaseImpl(
-                toDoItemRepository,
-                DeleteAlarmUseCaseImpl(applicationContext)
-            )
-            ReminderViewModel.Factory(
-                deleteItemUseCase,
-                UpdateItemUseCaseImpl(
-                    toDoItemRepository,
-                    ValidateItemUseCaseImpl(),
-                    deleteItemUseCase,
-                    CreateAlarmUseCaseImpl(applicationContext)
-                ),
-                Json.decodeFromString(args.toDoItemJson)
-            )
-        }
+        ReminderViewModel.getFactory(
+            viewModelDaggerFactory,
+            Json.decodeFromString(args.toDoItemJson)
+        )
     }
 
     private lateinit var tvText: TextView

@@ -12,32 +12,21 @@ import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import com.rkopylknu.minimaltodo.ui.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
 
-    private lateinit var updateItemUseCase: UpdateItemUseCase
+    @Inject
+    lateinit var updateItemUseCase: UpdateItemUseCase
 
     private var alarms = emptyMap<Long, PendingIntent>()
-
-    override fun onCreate() {
-        super.onCreate()
-        (application as App).run {
-            updateItemUseCase = UpdateItemUseCaseImpl(
-                toDoItemRepository,
-                ValidateItemUseCaseImpl(),
-                DeleteItemUseCaseImpl(
-                    toDoItemRepository,
-                    DeleteAlarmUseCaseImpl(applicationContext)
-                ),
-                CreateAlarmUseCaseImpl(applicationContext)
-            )
-        }
-    }
 
     override fun onHandleIntent(intent: Intent?) {
         intent ?: return

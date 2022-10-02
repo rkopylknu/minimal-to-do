@@ -3,8 +3,9 @@ package com.rkopylknu.minimaltodo.domain.usecase.impl
 import com.rkopylknu.minimaltodo.data.repository.ToDoItemRepository
 import com.rkopylknu.minimaltodo.domain.usecase.ReplaceItemUseCase
 import java.util.*
+import javax.inject.Inject
 
-class ReplaceItemUseCaseImpl(
+class ReplaceItemUseCaseImpl @Inject constructor(
     private val toDoItemRepository: ToDoItemRepository
 ) : ReplaceItemUseCase {
 

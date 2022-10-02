@@ -5,14 +5,17 @@ import androidx.lifecycle.ViewModelProvider
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 
-class ReminderViewModel(
+class ReminderViewModel @AssistedInject constructor(
     private val deleteItemUseCase: DeleteItemUseCase,
     private val updateItemUseCase: UpdateItemUseCase,
-    val toDoItem: ToDoItem
+    @Assisted val toDoItem: ToDoItem
 ) : ViewModel() {
 
     var snoozeOption: Int = SNOOZE_OPTIONS.first()
@@ -37,28 +40,23 @@ class ReminderViewModel(
         updateItemUseCase.execute(toDoItem, newToDoItem)
     }
 
-    class Factory(
-        private val deleteItemUseCase: DeleteItemUseCase,
-        private val updateItemUseCase: UpdateItemUseCase,
-        val toDoItem: ToDoItem
-    ) : ViewModelProvider.Factory {
+    @AssistedFactory
+    interface DaggerFactory {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ReminderViewModel::class.java)) {
-                return ReminderViewModel(
-                    deleteItemUseCase,
-                    updateItemUseCase,
-                    toDoItem
-                ) as T
-            } else {
-                throw IllegalArgumentException("Unexpected ViewModel class")
-            }
-        }
+        fun create(toDoItem: ToDoItem): ReminderViewModel
     }
 
     companion object {
 
         val SNOOZE_OPTIONS = listOf(10, 30, 60)
+
+        fun getFactory(daggerFactory: DaggerFactory, toDoItem: ToDoItem) =
+            object : ViewModelProvider.Factory {
+
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return daggerFactory.create(toDoItem) as T
+                }
+            }
     }
 }

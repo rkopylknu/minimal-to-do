@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.util.STORAGE_FILE_NAME
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -14,10 +15,11 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
+import javax.inject.Inject
 
 @OptIn(ExperimentalSerializationApi::class)
-class StoreRetrieveDataImpl(
-    private val appContext: Context,
+class StoreRetrieveDataImpl @Inject constructor(
+    @ApplicationContext private val appContext: Context,
 ) : StoreRetrieveData {
 
     private val serializer = ListSerializer(ToDoItem.serializer())

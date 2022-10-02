@@ -5,11 +5,13 @@ import android.content.Intent
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.DeleteAlarmUseCase
 import com.rkopylknu.minimaltodo.util.ReminderService
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
-class DeleteAlarmUseCaseImpl(
-    private val appContext: Context
+class DeleteAlarmUseCaseImpl @Inject constructor(
+    @ApplicationContext private val appContext: Context
 ): DeleteAlarmUseCase {
 
     override fun execute(item: ToDoItem) {

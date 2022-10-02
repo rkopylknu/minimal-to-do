@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class SettingsViewModel(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     private val appPreferencesManager: AppPreferencesManager
 ) : ViewModel() {
 
