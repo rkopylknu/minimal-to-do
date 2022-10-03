@@ -9,6 +9,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -23,7 +24,10 @@ import com.rkopylknu.minimaltodo.ui.about.AboutFragment
 import com.rkopylknu.minimaltodo.ui.add.AddToDoFragment
 import com.rkopylknu.minimaltodo.ui.settings.SettingsFragment
 import com.rkopylknu.minimaltodo.ui.util.RecyclerViewEmptySupport
+import com.rkopylknu.minimaltodo.util.collectOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -41,13 +45,7 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
         requireActivity().addMenuProvider(this, viewLifecycleOwner)
 
         setupUI()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
-        adapter.submitDataSet(viewModel.toDoItems)
+        setupObservers()
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -94,6 +92,13 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
         }
     }
 
+    private fun setupObservers() {
+        viewModel.toDoItems.collectOnLifecycle(viewLifecycleOwner) { items ->
+            val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
+            adapter.submitDataSet(items)
+        }
+    }
+
     private fun onToDoItemClick(toDoItem: ToDoItem) {
         findNavController().navigate(
             MainFragmentDirections.actionMainFragmentToAddToDoFragment(
@@ -107,25 +112,22 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
         rvToDoItems.adapter?.notifyItemMoved(from, to)
     }
 
-    private fun onToDoItemSwiped(position: Int) {
-        val swipedToDoItem = viewModel.toDoItems[position]
+    private fun onToDoItemSwiped(position: Int) =
+        viewLifecycleOwner.lifecycleScope.launch {
+            val swipedToDoItem = viewModel.toDoItems.first()[position]
 
-        viewModel.onDeleteItem(swipedToDoItem, position)
+            viewModel.onDeleteItem(swipedToDoItem, position)
 
-        val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
-        adapter.submitDataSet(viewModel.toDoItems)
-
-        Snackbar.make(
-            requireView(),
-            getString(R.string.deleted_todo),
-            Snackbar.LENGTH_LONG
-        )
-            .setAction(getString(R.string.undo)) {
-                viewModel.onRestoreItem()
-                adapter.submitDataSet(viewModel.toDoItems)
-            }
-            .show()
-    }
+            Snackbar.make(
+                requireView(),
+                getString(R.string.deleted_todo),
+                Snackbar.LENGTH_LONG
+            )
+                .setAction(getString(R.string.undo)) {
+                    viewModel.onRestoreItem()
+                }
+                .show()
+        }
 
     private fun onAddToDoItem() {
         findNavController().navigate(

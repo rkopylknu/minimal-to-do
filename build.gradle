@@ -5,15 +5,15 @@ buildscript{
         appcompat_version = "1.5.1"
         datetime_version = "0.4.0"
         serialization_version = "1.4.0"
-        viewmodel_version = "2.5.1"
-
-        // Shared Preferences
-        shared_preferences_version = "1.2.0"
 
         // UI
         material_version = "1.6.1"
         constraint_layout_version = "2.1.4"
         nav_version = "2.5.2"
+
+        // Data
+        shared_preferences_version = "1.2.0"
+        room_version = "2.4.3"
 
         // Dependency Injection
         hilt_version = "2.44"

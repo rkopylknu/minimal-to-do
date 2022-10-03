@@ -6,6 +6,7 @@ import com.rkopylknu.minimaltodo.domain.usecase.CreateAlarmUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.CreateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.ValidateItemUseCase
 import com.rkopylknu.minimaltodo.util.TO_DO_ITEM_COLORS
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class CreateItemUseCaseImpl @Inject constructor(
@@ -14,17 +15,16 @@ class CreateItemUseCaseImpl @Inject constructor(
     private val validateItemUseCase: ValidateItemUseCase
 ) : CreateItemUseCase {
 
-    override fun execute(item: ToDoItem) {
+    override suspend fun execute(item: ToDoItem) {
         if (!validateItemUseCase.execute(item)) return
 
         val newItem = item.copy(
-            id = toDoItemRepository.getValidId(),
-            color = TO_DO_ITEM_COLORS.random()
+            color = TO_DO_ITEM_COLORS.random(),
+            position =
+            toDoItemRepository.getMaxPosition()?.plus(1) ?: 0
         )
-
-        toDoItemRepository.mutate {
-            add(newItem)
-        }
-        createAlarmUseCase.execute(newItem)
+        val id = toDoItemRepository.insert(newItem)
+        val insertedItem = toDoItemRepository.getById(id).first()
+        insertedItem?.let { createAlarmUseCase.execute(it) }
     }
 }

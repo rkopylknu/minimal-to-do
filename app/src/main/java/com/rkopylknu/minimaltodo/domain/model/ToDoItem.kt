@@ -1,15 +1,31 @@
 package com.rkopylknu.minimaltodo.domain.model
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.rkopylknu.minimaltodo.data.util.LocalDateTimeSerializer
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Entity(
+    tableName = "to_do_item",
+    indices = [Index("position", unique = true)]
+)
 data class ToDoItem(
-    val id: Long,
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    val id: Long = 0L,
+    @ColumnInfo(name = "text")
     val text: String,
+    @ColumnInfo(name = "description")
     val description: String,
     @Serializable(with = LocalDateTimeSerializer::class)
+    @ColumnInfo(name = "reminder")
     val reminder: LocalDateTime?,
-    val color: Int
+    @ColumnInfo(name = "color")
+    val color: Int = 0,
+    @ColumnInfo(name = "position")
+    val position: Int = 0,
 )

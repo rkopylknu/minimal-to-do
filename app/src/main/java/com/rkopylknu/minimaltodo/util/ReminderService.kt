@@ -4,15 +4,23 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.data.repository.ToDoItemRepository
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import com.rkopylknu.minimaltodo.ui.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.decodeFromString
@@ -25,8 +33,10 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
 
     @Inject
     lateinit var updateItemUseCase: UpdateItemUseCase
-
-    private var alarms = emptyMap<Long, PendingIntent>()
+    @Inject
+    lateinit var coroutineScope: CoroutineScope
+    @Inject
+    lateinit var toDoItemRepository: ToDoItemRepository
 
     override fun onHandleIntent(intent: Intent?) {
         intent ?: return
@@ -37,7 +47,6 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
 
         when (intent.action) {
             ACTION_CREATE -> createAlarm(toDoItem)
-            ACTION_CANCEL -> cancelAlarm(toDoItem)
             ACTION_NOTIFY -> displayAlarm(toDoItem)
             ACTION_DELETE -> deleteAlarm(toDoItem)
             else -> throw IllegalStateException("Unexpected action")
@@ -45,6 +54,8 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
     }
 
     private fun createAlarm(toDoItem: ToDoItem) {
+
+
         val reminderTimeMillis = toDoItem.reminder
             ?.toInstant(TimeZone.currentSystemDefault())
             ?.run { toEpochMilliseconds() }
@@ -70,18 +81,15 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
             reminderTimeMillis,
             displayAlarmIntent
         )
-        alarms = alarms.plus(toDoItem.id to displayAlarmIntent)
-    }
-
-    private fun cancelAlarm(toDoItem: ToDoItem) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarms[toDoItem.id]?.let { displayAlarmIntent ->
-            alarmManager.cancel(displayAlarmIntent)
-        }
-        alarms = alarms.minus(toDoItem.id)
     }
 
     private fun displayAlarm(toDoItem: ToDoItem) {
+        val exists = runBlocking {
+            val ensured = toDoItemRepository.getById(toDoItem.id).first()
+            ensured?.reminder != null
+        }
+        if (!exists) return
+
         val showReminderIntent = PendingIntent.getActivity(
             this,
             toDoItem.hashCode(),
@@ -122,12 +130,11 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
     }
 
     private fun deleteAlarm(toDoItem: ToDoItem) {
-        cancelAlarm(toDoItem)
-
-        updateItemUseCase.execute(
-            toDoItem,
-            toDoItem.copy(reminder = null)
-        )
+        coroutineScope.launch {
+            updateItemUseCase.execute(
+                toDoItem.copy(reminder = null)
+            )
+        }
     }
 
     private fun setupNotificationChannel() {
@@ -150,8 +157,6 @@ class ReminderService : IntentService(REMINDER_SERVICE_NAME) {
 
         const val ACTION_CREATE =
             "com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.CREATE"
-        const val ACTION_CANCEL =
-            "com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.CANCEL"
         const val ACTION_NOTIFY =
             "com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.NOTIFY"
         const val ACTION_DELETE =

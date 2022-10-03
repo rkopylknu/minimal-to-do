@@ -4,5 +4,5 @@ import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 
 interface RestoreItemUseCase {
 
-    fun execute(item: ToDoItem, index: Int)
+    suspend fun execute(item: ToDoItem, position: Int)
 }

@@ -4,6 +4,7 @@ import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.data.repository.ToDoItemRepository
 import com.rkopylknu.minimaltodo.domain.usecase.CreateAlarmUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.RestoreItemUseCase
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class RestoreItemUseCaseImpl @Inject constructor(
@@ -11,10 +12,14 @@ class RestoreItemUseCaseImpl @Inject constructor(
     private val createAlarmUseCase: CreateAlarmUseCase
 ) : RestoreItemUseCase {
 
-    override fun execute(item: ToDoItem, index: Int) {
-        toDoItemRepository.mutate {
-            add(index, item)
-        }
+    override suspend fun execute(item: ToDoItem, position: Int) {
+        val allItems = toDoItemRepository.getAll().first()
+        val repositionedItems = allItems
+            .filter { it.position >= position }
+            .map { it.copy(position = it.position + 1) }
+
+        toDoItemRepository.update(repositionedItems)
+        toDoItemRepository.insert(item)
         createAlarmUseCase.execute(item)
     }
 }

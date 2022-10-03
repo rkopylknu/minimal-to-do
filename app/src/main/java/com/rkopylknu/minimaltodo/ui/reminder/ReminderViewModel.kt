@@ -2,12 +2,15 @@ package com.rkopylknu.minimaltodo.ui.reminder
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
@@ -26,7 +29,9 @@ class ReminderViewModel @AssistedInject constructor(
     }
 
     fun onDeleteItem() {
-        deleteItemUseCase.execute(toDoItem)
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteItemUseCase.execute(toDoItem.id)
+        }
     }
 
     fun onDelayReminder() {
@@ -37,7 +42,9 @@ class ReminderViewModel @AssistedInject constructor(
         }
         val newToDoItem = toDoItem.copy(reminder = delayedReminder)
 
-        updateItemUseCase.execute(toDoItem, newToDoItem)
+        viewModelScope.launch(Dispatchers.IO) {
+            updateItemUseCase.execute(newToDoItem)
+        }
     }
 
     @AssistedFactory

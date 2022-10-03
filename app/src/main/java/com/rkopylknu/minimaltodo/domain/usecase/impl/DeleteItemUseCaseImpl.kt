@@ -1,23 +1,22 @@
 package com.rkopylknu.minimaltodo.domain.usecase.impl
 
-import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.data.repository.ToDoItemRepository
-import com.rkopylknu.minimaltodo.domain.usecase.DeleteAlarmUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class DeleteItemUseCaseImpl @Inject constructor(
     private val toDoItemRepository: ToDoItemRepository,
-    private val deleteAlarmUseCase: DeleteAlarmUseCase,
 ) : DeleteItemUseCase {
 
-    override fun execute(item: ToDoItem) {
-        val ensuredItem = toDoItemRepository.load()
-            .find { it.id == item.id } ?: return
+    override suspend fun execute(id: Long) {
+        val allItems = toDoItemRepository.getAll().first()
+        val item = toDoItemRepository.getById(id).first()
+        val repositionedItems = allItems
+            .filter { it.position > (item?.position ?: 0) }
+            .map { it.copy(position = it.position - 1) }
 
-        toDoItemRepository.mutate {
-            remove(ensuredItem)
-        }
-        deleteAlarmUseCase.execute(ensuredItem)
+        toDoItemRepository.deleteById(id)
+        toDoItemRepository.update(repositionedItems)
     }
 }

@@ -36,7 +36,6 @@
             <intent-filter>
 
                 <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.CREATE" />
-                <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.CANCEL" />
                 <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.NOTIFY" />
                 <action android:name="com.rkopylknu.minimaltodo.data.local.ReminderNotificationService.DELETE" />
             </intent-filter>

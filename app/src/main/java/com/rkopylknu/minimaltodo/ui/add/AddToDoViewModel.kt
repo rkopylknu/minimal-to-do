@@ -2,6 +2,7 @@ package com.rkopylknu.minimaltodo.ui.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.CreateItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.UpdateItemUseCase
@@ -9,6 +10,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 
 class AddToDoViewModel @AssistedInject constructor(
@@ -54,18 +57,25 @@ class AddToDoViewModel @AssistedInject constructor(
     }
 
     fun onSaveItem(text: String, description: String) {
-        val newItem = ToDoItem(
-            id = CreateItemUseCase.EMPTY_ID,
-            text = text,
-            description = description,
-            reminder = reminder,
-            color = CreateItemUseCase.EMPTY_COLOR
-        )
-        toDoItem.let { oldItem ->
-            if (oldItem == null) {
+        val currentItem = toDoItem
+
+        if (currentItem == null) {
+            val newItem = ToDoItem(
+                text = text,
+                description = description,
+                reminder = reminder
+            )
+            viewModelScope.launch(Dispatchers.IO) {
                 createItemUseCase.execute(newItem)
-            } else {
-                updateItemUseCase.execute(oldItem, newItem)
+            }
+        } else {
+            val updatedItem = currentItem.copy(
+                text = text,
+                description = description,
+                reminder = reminder
+            )
+            viewModelScope.launch(Dispatchers.IO) {
+                updateItemUseCase.execute(updatedItem)
             }
         }
     }

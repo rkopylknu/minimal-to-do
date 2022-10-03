@@ -21,9 +21,6 @@ interface UseCaseBindingModule {
     fun bindCreateItemUseCase(impl: CreateItemUseCaseImpl): CreateItemUseCase
 
     @Binds
-    fun bindDeleteAlarmUseCase(impl: DeleteAlarmUseCaseImpl): DeleteAlarmUseCase
-
-    @Binds
     fun bindDeleteItemUseCase(impl: DeleteItemUseCaseImpl): DeleteItemUseCase
 
     @Binds

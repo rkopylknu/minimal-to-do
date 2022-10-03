@@ -3,6 +3,7 @@ package com.rkopylknu.minimaltodo.util
 const val STORAGE_FILE_NAME = "todoitems.json"
 const val REMINDER_SERVICE_NAME = "reminder_service"
 
+const val APP_DATABASE_NAME = "minimal_db"
 const val APP_PREFERENCES_NAME = "app_preferences"
 
 val TO_DO_ITEM_COLORS = setOf(
