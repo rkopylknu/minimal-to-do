@@ -11,17 +11,14 @@ import com.rkopylknu.minimaltodo.domain.usecase.ReplaceItemUseCase
 import com.rkopylknu.minimaltodo.domain.usecase.RestoreItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val displayItemsUseCase: DisplayItemsUseCase,
+    displayItemsUseCase: DisplayItemsUseCase,
     private val replaceItemUseCase: ReplaceItemUseCase,
     private val deleteItemUseCase: DeleteItemUseCase,
     private val restoreItemUseCase: RestoreItemUseCase,
@@ -30,10 +27,11 @@ class MainViewModel @Inject constructor(
 
     val toDoItems = displayItemsUseCase.execute()
 
-    val theme get() = appPreferencesManager.get().theme
-
     private var lastDeletedItem: ToDoItem? = null
     private var lastDeletedIndex: Int? = null
+
+    val theme =
+        appPreferencesManager.appPreferences.map { it.theme }
 
     fun onReplaceItem(from: Int, to: Int) {
         viewModelScope.launch(Dispatchers.IO) {

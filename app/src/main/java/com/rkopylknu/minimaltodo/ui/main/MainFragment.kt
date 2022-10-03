@@ -28,6 +28,7 @@ import com.rkopylknu.minimaltodo.util.collectOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -76,9 +77,12 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
         }
 
         rvToDoItems.run {
+            val theme = runBlocking {
+                viewModel.theme.first()
+            }
             adapter = ToDoItemAdapter(
                 onItemClick = ::onToDoItemClick,
-                theme = viewModel.theme
+                theme = theme
             )
 
             setEmptyView(requireView().findViewById(R.id.ll_empty))

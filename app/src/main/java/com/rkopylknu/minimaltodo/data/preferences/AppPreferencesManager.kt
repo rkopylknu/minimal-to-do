@@ -1,8 +1,10 @@
 package com.rkopylknu.minimaltodo.data.preferences
 
+import kotlinx.coroutines.flow.Flow
+
 interface AppPreferencesManager {
 
-    fun get(): AppPreferences
+    val appPreferences: Flow<AppPreferences>
 
-    fun setTheme(theme: Int)
+    suspend fun setTheme(theme: Int)
 }

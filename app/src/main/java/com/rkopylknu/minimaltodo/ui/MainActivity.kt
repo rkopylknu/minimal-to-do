@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -14,6 +15,13 @@ import com.rkopylknu.minimaltodo.NavGraphDirections
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -72,7 +80,10 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     fun applyTheme(appPreferencesManager: AppPreferencesManager) {
-        setTheme(appPreferencesManager.get().theme)
+        runBlocking {
+            val theme = appPreferencesManager.appPreferences.first().theme
+            setTheme(theme)
+        }
     }
 
     companion object {

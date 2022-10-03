@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.util.collectOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,14 +24,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         super.onViewCreated(view, savedInstanceState)
 
         setupUI()
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-
-        // Theme state is shown in onViewStateRestored
-        // to override restored view state
-        showThemeState(viewModel.theme)
+        setupObservers()
     }
 
     private fun setupUI() {
@@ -41,9 +35,17 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         clNightMode.setOnClickListener {
-            viewModel.onSwitchNightMode()
-            requireActivity().recreate()
+            viewModel.onSwitchNightMode {
+                requireActivity().recreate()
+            }
         }
+    }
+
+    private fun setupObservers() {
+        viewModel.theme.collectOnLifecycle(
+            viewLifecycleOwner,
+            collector = ::showThemeState
+        )
     }
 
     private fun showThemeState(theme: Int) {
