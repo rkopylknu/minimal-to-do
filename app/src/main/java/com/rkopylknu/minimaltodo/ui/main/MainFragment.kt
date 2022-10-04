@@ -18,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.databinding.FragmentMainBinding
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import com.rkopylknu.minimaltodo.ui.about.AboutFragment
@@ -37,11 +38,12 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var rvToDoItems: RecyclerViewEmptySupport
-    private lateinit var fabAddToDoItem: FloatingActionButton
+    private var _binding: FragmentMainBinding? = null
+    private val binding get() = checkNotNull(_binding)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentMainBinding.bind(view)
 
         requireActivity().addMenuProvider(this, viewLifecycleOwner)
 
@@ -70,12 +72,7 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
         return true
     }
 
-    private fun setupUI() {
-        requireView().run {
-            rvToDoItems = findViewById(R.id.rv_to_do_items)
-            fabAddToDoItem = findViewById(R.id.fab_add_to_do_item)
-        }
-
+    private fun setupUI() = binding.run {
         rvToDoItems.run {
             val theme = runBlocking {
                 viewModel.theme.first()
@@ -98,7 +95,7 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
     private fun setupObservers() {
         viewModel.toDoItems.collectOnLifecycle(viewLifecycleOwner) { items ->
-            val adapter = (rvToDoItems.adapter as ToDoItemAdapter)
+            val adapter = (binding.rvToDoItems.adapter as ToDoItemAdapter)
             adapter.submitDataSet(items)
         }
     }
@@ -113,7 +110,7 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
 
     private fun onToDoItemMoved(from: Int, to: Int) {
         viewModel.onReplaceItem(from, to)
-        rvToDoItems.adapter?.notifyItemMoved(from, to)
+        binding.rvToDoItems.adapter?.notifyItemMoved(from, to)
     }
 
     private fun onToDoItemSwiped(position: Int) =
@@ -174,4 +171,9 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
             }
         }
     )
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

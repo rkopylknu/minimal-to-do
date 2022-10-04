@@ -8,6 +8,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.databinding.FragmentMainBinding
+import com.rkopylknu.minimaltodo.databinding.FragmentReminderBinding
+import com.rkopylknu.minimaltodo.databinding.FragmentSettingsBinding
 import com.rkopylknu.minimaltodo.util.collectOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,24 +19,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     private val viewModel: SettingsViewModel by viewModels()
 
-    private lateinit var clNightMode: ConstraintLayout
-    private lateinit var tvNightModeState: TextView
-    private lateinit var cbNightMode: CheckBox
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = checkNotNull(_binding)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentSettingsBinding.bind(view)
 
         setupUI()
         setupObservers()
     }
 
-    private fun setupUI() {
-        requireView().run {
-            clNightMode = findViewById(R.id.cl_night_mode)
-            tvNightModeState = findViewById(R.id.tv_night_mode_state)
-            cbNightMode = findViewById(R.id.cb_night_mode)
-        }
-
+    private fun setupUI() = binding.run {
         clNightMode.setOnClickListener {
             viewModel.onSwitchNightMode {
                 requireActivity().recreate()
@@ -48,7 +45,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         )
     }
 
-    private fun showThemeState(theme: Int) {
+    private fun showThemeState(theme: Int) = binding.run {
         if (theme == R.style.Theme_MinimalToDo_Light) {
             tvNightModeState.text = getString(R.string.night_mode_off)
             cbNightMode.isChecked = false
@@ -56,5 +53,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             tvNightModeState.text = getString(R.string.night_mode_on)
             cbNightMode.isChecked = true
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -14,6 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.rkopylknu.minimaltodo.NavGraphDirections
 import com.rkopylknu.minimaltodo.R
 import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
+import com.rkopylknu.minimaltodo.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectIndexed
@@ -27,20 +28,22 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
+
     private var _navController: NavController? = null
     private val navController get() = checkNotNull(_navController)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         _navController = (supportFragmentManager
             .findFragmentById(R.id.fragment_container_view) as NavHostFragment)
             .navController
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        toolbar.setupWithNavController(navController)
+        setSupportActionBar(binding.toolbar)
+        binding.toolbar.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             onDestinationChanged(destination)

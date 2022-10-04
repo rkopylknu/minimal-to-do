@@ -17,6 +17,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.databinding.FragmentMainBinding
+import com.rkopylknu.minimaltodo.databinding.FragmentReminderBinding
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.decodeFromString
@@ -38,25 +40,19 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder), MenuProvider {
         )
     }
 
-    private lateinit var tvText: TextView
-    private lateinit var spinnerSnoozeTime: AppCompatSpinner
-    private lateinit var btnRemove: Button
+    private var _binding: FragmentReminderBinding? = null
+    private val binding get() = checkNotNull(_binding)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentReminderBinding.bind(view)
 
         requireActivity().addMenuProvider(this, viewLifecycleOwner)
 
         setupUI()
     }
 
-    private fun setupUI() {
-        requireView().run {
-            tvText = findViewById(R.id.tv_text)
-            spinnerSnoozeTime = findViewById(R.id.spinner_snooze_time)
-            btnRemove = findViewById(R.id.btn_remove)
-        }
-
+    private fun setupUI() = binding.run {
         tvText.text = viewModel.toDoItem.text
 
         spinnerSnoozeTime.run {
@@ -107,5 +103,10 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder), MenuProvider {
             else -> return false
         }
         return true
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

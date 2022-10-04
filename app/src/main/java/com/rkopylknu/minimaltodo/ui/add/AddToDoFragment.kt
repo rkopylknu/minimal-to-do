@@ -22,6 +22,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.databinding.FragmentAddToDoBinding
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import com.rkopylknu.minimaltodo.util.appCompatActivity
 import com.rkopylknu.minimaltodo.util.getColorCompat
@@ -49,46 +50,27 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         )
     }
 
-    private lateinit var etText: EditText
-    private lateinit var etDescription: EditText
-    private lateinit var switchAddReminder: SwitchCompat
-    private lateinit var etReminderDate: EditText
-    private lateinit var etReminderTime: EditText
-    private lateinit var fabSaveToDoItem: FloatingActionButton
-    private lateinit var btnCopy: Button
-    private lateinit var clReminder: ConstraintLayout
-    private lateinit var tvReminderSet: TextView
+    private var _binding: FragmentAddToDoBinding? = null
+    private val binding get() = checkNotNull(_binding)
 
     private var actionBarElevation: Float? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentAddToDoBinding.bind(view)
 
         appCompatActivity?.supportActionBar?.run {
             actionBarElevation = elevation
             elevation = 0f
         }
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
 
         setupUI()
     }
 
-    private fun setupUI() {
-        requireView().run {
-            etText = findViewById(R.id.et_text)
-            etDescription = findViewById(R.id.et_description)
-            switchAddReminder = findViewById(R.id.switch_add_reminder)
-            etReminderDate = findViewById(R.id.et_reminder_date)
-            etReminderTime = findViewById(R.id.et_reminder_time)
-            fabSaveToDoItem = findViewById(R.id.fab_save_to_do_item)
-            btnCopy = findViewById(R.id.btn_copy)
-            clReminder = findViewById(R.id.cl_reminder)
-            tvReminderSet = findViewById(R.id.tv_reminder_set)
-        }
-
+    private fun setupUI() = binding.run {
         viewModel.toDoItem?.run {
             etText.setText(text)
             etDescription.setText(description)
@@ -141,7 +123,7 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         }
     }
 
-    private fun displayReminder() {
+    private fun displayReminder() = binding.run {
         val reminder = viewModel.reminder
         etReminderDate.setText(reminder?.date?.toString() ?: "")
         etReminderTime.setText(reminder?.time?.toString() ?: "")
@@ -196,8 +178,8 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
             ClipData.newPlainText(
                 "text",
                 viewModel.getClipboardText(
-                    etText.text.toString(),
-                    etDescription.text.toString()
+                    binding.etText.text.toString(),
+                    binding.etDescription.text.toString()
                 )
             )
         )
@@ -211,6 +193,7 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding = null
 
         actionBarElevation?.let {
             appCompatActivity?.supportActionBar?.elevation = it
