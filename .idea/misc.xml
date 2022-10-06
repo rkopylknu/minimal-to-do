@@ -48,9 +48,12 @@
         <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/activity_settings.xml" value="0.1796875" />
         <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_about.xml" value="0.1796875" />
         <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_activity.xml" value="0.1796875" />
-        <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_add_to_do.xml" value="0.1796875" />
+        <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_add_to_do.xml" value="0.22" />
         <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_main.xml" value="0.1796875" />
         <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_reminder.xml" value="0.1796875" />
+        <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/fragment_settings.xml" value="0.1796875" />
+        <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/item_snooze_option.xml" value="0.1796875" />
+        <entry key="..\:/Users/All/Documents/university/3/1/kpz/lab/minimal/app/src/main/res/layout/item_to_do_item.xml" value="0.1796875" />
       </map>
     </option>
   </component>

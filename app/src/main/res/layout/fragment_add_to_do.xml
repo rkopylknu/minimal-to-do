@@ -31,6 +31,7 @@
         app:layout_constraintVertical_weight="0.5">
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center">
@@ -53,6 +54,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_description"
+        style="@style/Widget.Material3.TextInputLayout.FilledBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingTop="20dp"
@@ -108,21 +110,14 @@
                 app:srcCompat="@drawable/ic_add_alarm_outlined"
                 app:tint="#727272" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:padding="8dp"
-                android:text="@string/remind_me"
-                android:textColor="@color/secondary_text"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switch_add_reminder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="8dp" />
+                android:layout_weight="3"
+                android:padding="8dp"
+                android:text="@string/remind_me"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btn_copy"

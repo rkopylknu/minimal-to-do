@@ -7,18 +7,13 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.widget.AppCompatSpinner
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import com.rkopylknu.minimaltodo.databinding.FragmentReminderBinding
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.rkopylknu.minimaltodo.App
 import com.rkopylknu.minimaltodo.R
-import com.rkopylknu.minimaltodo.databinding.FragmentMainBinding
-import com.rkopylknu.minimaltodo.databinding.FragmentReminderBinding
 import com.rkopylknu.minimaltodo.domain.usecase.impl.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.decodeFromString
@@ -56,13 +51,13 @@ class ReminderFragment : Fragment(R.layout.fragment_reminder), MenuProvider {
         tvText.text = viewModel.toDoItem.text
 
         spinnerSnoozeTime.run {
-            val snoozeOptionsStrings =
+            val snoozeOptions =
                 resources.getStringArray(R.array.snooze_options)
 
             adapter = ArrayAdapter(
                 requireContext(),
                 R.layout.item_snooze_option,
-                snoozeOptionsStrings
+                snoozeOptions
             )
 
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
