@@ -74,6 +74,7 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         viewModel.toDoItem?.run {
             etText.setText(text)
             etDescription.setText(description)
+            cbIsPrior.isChecked = isPrior
             displayReminder()
         }
 
@@ -94,7 +95,8 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
         fabSaveToDoItem.setOnClickListener {
             viewModel.onSaveItem(
                 etText.text.toString(),
-                etDescription.text.toString()
+                etDescription.text.toString(),
+                cbIsPrior.isChecked
             )
             findNavController().navigateUp()
         }

@@ -12,13 +12,7 @@ class RestoreItemUseCaseImpl @Inject constructor(
     private val createAlarmUseCase: CreateAlarmUseCase
 ) : RestoreItemUseCase {
 
-    override suspend fun execute(item: ToDoItem, position: Int) {
-        val allItems = toDoItemRepository.getAll().first()
-        val repositionedItems = allItems
-            .filter { it.position >= position }
-            .map { it.copy(position = it.position + 1) }
-
-        toDoItemRepository.update(repositionedItems)
+    override suspend fun execute(item: ToDoItem) {
         toDoItemRepository.insert(item)
         createAlarmUseCase.execute(item)
     }

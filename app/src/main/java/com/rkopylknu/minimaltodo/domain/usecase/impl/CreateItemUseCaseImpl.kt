@@ -20,8 +20,6 @@ class CreateItemUseCaseImpl @Inject constructor(
 
         val newItem = item.copy(
             color = TO_DO_ITEM_COLORS.random(),
-            position =
-            toDoItemRepository.getMaxPosition()?.plus(1) ?: 0
         )
         val id = toDoItemRepository.insert(newItem)
         val insertedItem = toDoItemRepository.getById(id).first()

@@ -7,17 +7,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ToDoItemDao {
 
-    @Query("SELECT * FROM to_do_item ORDER BY position")
+    @Query("SELECT * FROM to_do_item ORDER BY is_prior DESC")
     fun getAll(): Flow<List<ToDoItem>>
 
     @Query("SELECT * FROM to_do_item WHERE id = :id")
     fun getById(id: Long): Flow<ToDoItem>
-
-    @Query("SELECT * FROM to_do_item WHERE position = :position")
-    fun getByPosition(position: Int): Flow<ToDoItem>
-
-    @Query("SELECT MAX(position) FROM to_do_item")
-    fun getMaxPosition(): Int?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(toDoItem: ToDoItem): Long

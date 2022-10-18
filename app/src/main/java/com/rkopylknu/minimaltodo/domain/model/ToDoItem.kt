@@ -10,8 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity(
-    tableName = "to_do_item",
-    indices = [Index("position", unique = true)]
+    tableName = "to_do_item"
 )
 data class ToDoItem(
     @PrimaryKey(autoGenerate = true)
@@ -21,11 +20,11 @@ data class ToDoItem(
     val text: String,
     @ColumnInfo(name = "description")
     val description: String,
+    @ColumnInfo(name = "is_prior")
+    val isPrior: Boolean,
     @Serializable(with = LocalDateTimeSerializer::class)
     @ColumnInfo(name = "reminder")
     val reminder: LocalDateTime?,
     @ColumnInfo(name = "color")
     val color: Int = 0,
-    @ColumnInfo(name = "position")
-    val position: Int = 0,
 )

@@ -10,13 +10,6 @@ class DeleteItemUseCaseImpl @Inject constructor(
 ) : DeleteItemUseCase {
 
     override suspend fun execute(id: Long) {
-        val allItems = toDoItemRepository.getAll().first()
-        val item = toDoItemRepository.getById(id).first()
-        val repositionedItems = allItems
-            .filter { it.position > (item?.position ?: 0) }
-            .map { it.copy(position = it.position - 1) }
-
         toDoItemRepository.deleteById(id)
-        toDoItemRepository.update(repositionedItems)
     }
 }

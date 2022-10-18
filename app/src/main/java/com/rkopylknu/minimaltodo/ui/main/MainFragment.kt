@@ -108,11 +108,6 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
         )
     }
 
-    private fun onToDoItemMoved(from: Int, to: Int) {
-        viewModel.onReplaceItem(from, to)
-        binding.rvToDoItems.adapter?.notifyItemMoved(from, to)
-    }
-
     private fun onToDoItemSwiped(position: Int) =
         viewLifecycleOwner.lifecycleScope.launch {
             val swipedToDoItem = viewModel.toDoItems.first()[position]
@@ -139,7 +134,7 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
     private fun buildItemTouchHelper() = ItemTouchHelper(
         object : ItemTouchHelper.Callback() {
 
-            override fun isLongPressDragEnabled() = true
+            override fun isLongPressDragEnabled() = false
             override fun isItemViewSwipeEnabled() = true
 
             override fun getMovementFlags(
@@ -151,24 +146,18 @@ class MainFragment : Fragment(R.layout.fragment_main), MenuProvider {
                 return makeMovementFlags(upFlags, swipeFlags)
             }
 
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder,
-            ): Boolean {
-                onToDoItemMoved(
-                    viewHolder.adapterPosition,
-                    target.adapterPosition
-                )
-                return true
-            }
-
             override fun onSwiped(
                 viewHolder: RecyclerView.ViewHolder,
                 direction: Int,
             ) {
                 onToDoItemSwiped(viewHolder.adapterPosition)
             }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean = false
         }
     )
 

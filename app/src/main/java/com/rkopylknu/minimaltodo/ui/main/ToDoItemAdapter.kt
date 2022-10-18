@@ -11,6 +11,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.databinding.ItemToDoItemBinding
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.ui.main.ToDoItemAdapter.*
 import com.rkopylknu.minimaltodo.ui.util.TextDrawable
@@ -29,8 +30,8 @@ class ToDoItemAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ToDoItemViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.item_to_do_item,
+            ItemToDoItemBinding.inflate(
+                LayoutInflater.from(parent.context),
                 parent,
                 false
             )
@@ -48,14 +49,10 @@ class ToDoItemAdapter(
     override fun getItemCount() = toDoItems.size
 
     inner class ToDoItemViewHolder(
-        private val view: View,
-    ) : RecyclerView.ViewHolder(view) {
+        private val binding: ItemToDoItemBinding,
+    ) : RecyclerView.ViewHolder(binding.root) {
 
-        private val tvText = view.findViewById<TextView>(R.id.tv_text)
-        private val ivImage = view.findViewById<ImageView>(R.id.iv_image)
-        private val tvReminder = view.findViewById<TextView>(R.id.tv_reminder)
-
-        fun bind(toDoItem: ToDoItem) = view.run {
+        fun bind(toDoItem: ToDoItem) = binding.run {
             tvText.text = toDoItem.text
             ivImage.run {
                 val letter = toDoItem.text.firstOrNull().toString()
@@ -70,6 +67,7 @@ class ToDoItemAdapter(
                     )
                 }
             }
+            ivStar.isVisible = toDoItem.isPrior
             applyTheme()
         }
 
@@ -81,16 +79,20 @@ class ToDoItemAdapter(
                 .endConfig()
                 .buildRound(text, color)
 
-        private fun applyTheme() = view.run {
+        private fun applyTheme() = binding.run {
             val (bgColor, textColor) =
                 if (theme == R.style.Theme_MinimalToDo_Light) {
                     Color.WHITE to ResourcesCompat
-                        .getColor(resources, R.color.secondary_text, context.theme)
+                        .getColor(
+                            root.resources,
+                            R.color.secondary_text,
+                            root.context.theme
+                        )
                 } else {
                     Color.DKGRAY to Color.WHITE
                 }
 
-            setBackgroundColor(bgColor)
+            root.setBackgroundColor(bgColor)
             tvText.setTextColor(textColor)
         }
     }

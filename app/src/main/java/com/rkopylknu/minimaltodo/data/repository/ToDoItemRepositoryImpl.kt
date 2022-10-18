@@ -13,12 +13,6 @@ class ToDoItemRepositoryImpl @Inject constructor(
     override fun getById(id: Long) =
         toDoItemDao.getById(id)
 
-    override fun getByPosition(position: Int) =
-        toDoItemDao.getByPosition(position)
-
-    override fun getMaxPosition() =
-        toDoItemDao.getMaxPosition()
-
     override suspend fun insert(toDoItem: ToDoItem) =
         toDoItemDao.insert(toDoItem)
 

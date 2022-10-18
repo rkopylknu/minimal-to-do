@@ -9,10 +9,6 @@ interface ToDoItemRepository {
 
     fun getById(id: Long): Flow<ToDoItem?>
 
-    fun getByPosition(position: Int): Flow<ToDoItem?>
-
-    fun getMaxPosition(): Int?
-
     suspend fun insert(toDoItem: ToDoItem): Long
 
     suspend fun update(toDoItem: ToDoItem)

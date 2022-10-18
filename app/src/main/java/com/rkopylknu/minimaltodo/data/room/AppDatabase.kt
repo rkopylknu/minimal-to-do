@@ -8,7 +8,7 @@ import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 
 @Database(
     entities = [ToDoItem::class],
-    version = 1
+    version = 3
 )
 @TypeConverters(AppDatabaseConverters::class)
 abstract class AppDatabase : RoomDatabase() {

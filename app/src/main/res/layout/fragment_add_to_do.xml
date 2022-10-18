@@ -88,48 +88,69 @@
         app:layout_constraintTop_toBottomOf="@id/layout_description"
         app:layout_constraintVertical_weight="1.5">
 
-        <LinearLayout
-            android:id="@+id/ll_toggle_reminder"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ll_settings"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="30dp"
-            android:gravity="center"
-            android:orientation="horizontal"
             app:layout_constraintBottom_toTopOf="@id/cl_reminder"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_weight="0.5">
+            app:layout_constraintVertical_weight="1">
 
-            <ImageButton
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cb_is_prior"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/is_prior"
+                app:layout_constraintBottom_toTopOf="@id/ll_toggle_reminder"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/ll_toggle_reminder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".4"
-                android:background="@android:color/transparent"
-                android:padding="8dp"
-                app:srcCompat="@drawable/ic_add_alarm_outlined"
-                app:tint="#727272" />
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cb_is_prior">
 
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switch_add_reminder"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:padding="8dp"
-                android:text="@string/remind_me"
-                android:textSize="16sp" />
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".4"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp"
+                    app:srcCompat="@drawable/ic_add_alarm_outlined"
+                    app:tint="#727272" />
 
-            <Button
-                android:id="@+id/btn_copy"
-                android:layout_width="0dp"
-                android:layout_height="28dp"
-                android:layout_margin="8dp"
-                android:layout_weight=".37"
-                android:background="@drawable/ic_content_copy_outlined"
-                android:padding="8dp"
-                app:backgroundTint="@color/grey600" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switch_add_reminder"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:padding="8dp"
+                    android:text="@string/remind_me"
+                    android:textSize="16sp" />
 
-        </LinearLayout>
+                <Button
+                    android:id="@+id/btn_copy"
+                    android:layout_width="0dp"
+                    android:layout_height="28dp"
+                    android:layout_margin="8dp"
+                    android:layout_weight=".37"
+                    android:background="@drawable/ic_content_copy_outlined"
+                    android:padding="8dp"
+                    app:backgroundTint="@color/grey600" />
+
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_reminder"
@@ -139,7 +160,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ll_toggle_reminder"
+            app:layout_constraintTop_toBottomOf="@id/ll_settings"
             app:layout_constraintVertical_weight="1">
 
             <EditText

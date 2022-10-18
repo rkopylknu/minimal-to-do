@@ -19,12 +19,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:lines="1"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/tv_reminder"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iv_star"
         app:layout_constraintStart_toEndOf="@id/iv_image"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:text="Clean your room" />
@@ -33,12 +35,25 @@
         android:id="@+id/tv_reminder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:textColor="?attr/colorAccent"
+
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/tv_text"
+        app:layout_constraintEnd_toStartOf="@id/iv_star"
         app:layout_constraintStart_toStartOf="@id/tv_text"
         app:layout_constraintTop_toBottomOf="@id/tv_text"
         tools:text="27 Sept 2015, 22:30" />
+
+    <ImageView
+        android:id="@+id/iv_star"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_star_filled"
+        app:tint="?attr/colorTertiary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -42,8 +42,5 @@ interface BindingModule {
     fun bindDisplayItemsUseCase(impl: DisplayItemsUseCaseImpl): DisplayItemsUseCase
 
     @Binds
-    fun bindReplaceItemUseCase(impl: ReplaceItemUseCaseImpl): ReplaceItemUseCase
-
-    @Binds
     fun bindRestoreItemUseCase(impl: RestoreItemUseCaseImpl): RestoreItemUseCase
 }

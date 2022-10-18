@@ -56,13 +56,14 @@ class AddToDoViewModel @AssistedInject constructor(
         }
     }
 
-    fun onSaveItem(text: String, description: String) {
+    fun onSaveItem(text: String, description: String, isPrior: Boolean) {
         val currentItem = toDoItem
 
         if (currentItem == null) {
             val newItem = ToDoItem(
                 text = text,
                 description = description,
+                isPrior = isPrior,
                 reminder = reminder
             )
             viewModelScope.launch(Dispatchers.IO) {
@@ -72,6 +73,7 @@ class AddToDoViewModel @AssistedInject constructor(
             val updatedItem = currentItem.copy(
                 text = text,
                 description = description,
+                isPrior = isPrior,
                 reminder = reminder
             )
             viewModelScope.launch(Dispatchers.IO) {
