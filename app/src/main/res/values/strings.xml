@@ -27,6 +27,7 @@
     <string name="sort_order">Sort Order</string>
     <string name="by_time">By Time</string>
     <string name="by_name">By Name</string>
+    <string name="share">Share</string>
 
     <string-array name="months_abbreviations">
         <item>jan</item>

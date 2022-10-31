@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateFormat
@@ -123,6 +124,10 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
                 DateFormat.is24HourFormat(requireContext())
             ).show()
         }
+
+        tvShare.setOnClickListener {
+            shareToDoItem()
+        }
     }
 
     private fun displayReminder() = binding.run {
@@ -191,6 +196,21 @@ class AddToDoFragment : Fragment(R.layout.fragment_add_to_do) {
             "Copied To Clipboard!",
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    private fun shareToDoItem() {
+        val shareText = viewModel.getClipboardText(
+            binding.etText.text.toString(),
+            binding.etDescription.text.toString()
+        )
+        val shareIntent = Intent.createChooser(
+            Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                type = "text/plain"
+            },
+            null
+        )
+        startActivity(shareIntent)
     }
 
     override fun onDestroyView() {
