@@ -24,6 +24,9 @@
     <string name="contact_me">You can contact me at</string>
     <string name="is_prior">Is Prior</string>
     <string name="email_address" translatable="false">avisekhon2@gmail.com</string>
+    <string name="sort_order">Sort Order</string>
+    <string name="by_time">By Time</string>
+    <string name="by_name">By Name</string>
 
     <string-array name="months_abbreviations">
         <item>jan</item>

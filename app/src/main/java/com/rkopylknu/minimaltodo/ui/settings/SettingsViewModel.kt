@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.rkopylknu.minimaltodo.R
+import com.rkopylknu.minimaltodo.data.preferences.AppPreferences
 import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -12,11 +13,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val appPreferencesManager: AppPreferencesManager
+    private val appPreferencesManager: AppPreferencesManager,
 ) : ViewModel() {
 
-    val theme get() =
-        appPreferencesManager.appPreferences.map { it.theme }
+    val theme
+        get() = appPreferencesManager.appPreferences.map { it.theme }
+
+    val sortOrder
+        get() = appPreferencesManager.appPreferences.map { it.sortOrder }
 
     fun onSwitchNightMode(block: () -> Unit = {}) {
         viewModelScope.launch {
@@ -28,6 +32,12 @@ class SettingsViewModel @Inject constructor(
                 }
             )
             block()
+        }
+    }
+
+    fun onChooseSortOrder(sortOrder: AppPreferences.SortOrder) {
+        viewModelScope.launch {
+            appPreferencesManager.setSortOrder(sortOrder)
         }
     }
 }

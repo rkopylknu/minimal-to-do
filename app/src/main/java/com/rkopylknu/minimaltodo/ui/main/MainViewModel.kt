@@ -2,6 +2,7 @@ package com.rkopylknu.minimaltodo.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rkopylknu.minimaltodo.data.preferences.AppPreferences
 import com.rkopylknu.minimaltodo.data.preferences.AppPreferencesManager
 import com.rkopylknu.minimaltodo.domain.model.ToDoItem
 import com.rkopylknu.minimaltodo.domain.usecase.DeleteItemUseCase
@@ -18,7 +19,7 @@ class MainViewModel @Inject constructor(
     displayItemsUseCase: DisplayItemsUseCase,
     private val deleteItemUseCase: DeleteItemUseCase,
     private val restoreItemUseCase: RestoreItemUseCase,
-    appPreferencesManager: AppPreferencesManager
+    appPreferencesManager: AppPreferencesManager,
 ) : ViewModel() {
 
     val toDoItems = displayItemsUseCase.execute()
